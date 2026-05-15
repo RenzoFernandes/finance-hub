@@ -139,22 +139,3 @@ npx prisma migrate deploy
 
 ---
 
-**Licença**
-
-Defina a licença do projeto (ex.: MIT). Atualize este arquivo com a licença escolhida.
-
----
-
-**Contato**
-
-- Mantenedor: Seu Nome — seu.email@example.com
-
----
-
-Se quiser, posso:
-
-- Ajustar o README para inglês.
-- Incluir badges (build, license, coverage) e screenshots.
-- Personalizar instruções de deploy (Vercel / Docker image).
-
-Diga qual desses próximos passos prefere.
