@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: financehub-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: financehub
+    ports:
+      - "5432:5432"
+    volumes:
+      - financehub_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  financehub_postgres_data:
