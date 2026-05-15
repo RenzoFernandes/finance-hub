@@ -12,14 +12,14 @@ export function LoginForm({ demoError }: { demoError?: boolean }) {
   return (
     <div className="space-y-4">
       {(state.error || demoError) && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-2xl border border-rose-300/30 bg-rose-300/10 px-4 py-3 text-sm text-rose-100">
           {state.error ?? "Rode o seed para criar a conta demo antes de entrar."}
         </div>
       )}
 
       <form action={formAction} className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-zinc-200" htmlFor="email">
+          <label className="text-sm font-medium text-slate-200" htmlFor="email">
             E-mail
           </label>
           <Input
@@ -28,13 +28,13 @@ export function LoginForm({ demoError }: { demoError?: boolean }) {
             type="email"
             autoComplete="email"
             defaultValue="demo@financehub.com"
-            className="h-11 border-zinc-700 bg-zinc-950 text-white"
+            className="field-control h-11"
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-zinc-200" htmlFor="password">
+          <label className="text-sm font-medium text-slate-200" htmlFor="password">
             Senha
           </label>
           <Input
@@ -43,19 +43,19 @@ export function LoginForm({ demoError }: { demoError?: boolean }) {
             type="password"
             autoComplete="current-password"
             defaultValue="demo123456"
-            className="h-11 border-zinc-700 bg-zinc-950 text-white"
+            className="field-control h-11"
             required
           />
         </div>
 
-        <Button disabled={isPending} className="h-11 w-full bg-emerald-500 text-zinc-950 hover:bg-emerald-400">
+        <Button disabled={isPending} className="h-11 w-full rounded-xl bg-emerald-300 font-semibold text-slate-950 hover:bg-emerald-200">
           {isPending ? <Loader2 className="animate-spin" /> : <LogIn />}
           Entrar
         </Button>
       </form>
 
       <form action={demoLoginAction}>
-        <Button type="submit" variant="outline" className="h-11 w-full border-zinc-700 bg-zinc-950 text-white hover:bg-zinc-800">
+        <Button type="submit" variant="outline" className="h-11 w-full rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08]">
           Entrar com conta demo
         </Button>
       </form>

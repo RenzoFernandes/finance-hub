@@ -49,20 +49,21 @@ export default async function ReportsPage({
   const query = new URLSearchParams(Object.entries(params).filter((entry): entry is [string, string] => Boolean(entry[1])));
 
   return (
-    <main className="flex min-h-screen bg-zinc-950">
+    <main className="app-shell">
       <Sidebar />
 
-      <div className="min-w-0 flex-1">
+      <div className="app-main">
         <Topbar title="Relatórios" userName={user.name} />
 
-        <div className="p-4 text-white md:p-8">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="page-container">
+          <div className="page-header">
             <div>
-              <h1 className="text-3xl font-bold">Relatórios financeiros</h1>
-              <p className="mt-2 text-zinc-400">Analise períodos, categorias e tipos de movimentação.</p>
+              <p className="page-kicker">Inteligência financeira</p>
+              <h1 className="page-title">Relatórios financeiros</h1>
+              <p className="page-description">Analise períodos, categorias e tipos de movimentação com resumo executivo e tabela detalhada.</p>
             </div>
 
-            <Button asChild variant="outline" className="h-10 border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">
+            <Button asChild variant="outline" className="h-11 rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08]">
               <Link href={`/api/export/report?${query.toString()}`}>
                 <Download />
                 Exportar PDF
@@ -70,13 +71,13 @@ export default async function ReportsPage({
             </Button>
           </div>
 
-          <form className="mt-8 grid gap-3 rounded-xl border border-zinc-800 bg-zinc-900 p-4 md:grid-cols-2 xl:grid-cols-[160px_220px_160px_160px_auto]">
-            <select name="type" defaultValue={params.type ?? ""} className="h-10 rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-white outline-none">
+          <form className="surface-panel mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-[160px_220px_160px_160px_auto]">
+            <select name="type" defaultValue={params.type ?? ""} className="field-control">
               <option value="">Todos os tipos</option>
               <option value="income">Receitas</option>
               <option value="expense">Despesas</option>
             </select>
-            <select name="categoryId" defaultValue={params.categoryId ?? ""} className="h-10 rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-white outline-none">
+            <select name="categoryId" defaultValue={params.categoryId ?? ""} className="field-control">
               <option value="">Todas as categorias</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
@@ -84,9 +85,9 @@ export default async function ReportsPage({
                 </option>
               ))}
             </select>
-            <Input name="start" type="date" defaultValue={params.start} className="h-10 border-zinc-800 bg-zinc-950 text-white" />
-            <Input name="end" type="date" defaultValue={params.end} className="h-10 border-zinc-800 bg-zinc-950 text-white" />
-            <Button className="h-10 bg-zinc-100 text-zinc-950 hover:bg-white">Filtrar</Button>
+            <Input name="start" type="date" defaultValue={params.start} className="field-control" />
+            <Input name="end" type="date" defaultValue={params.end} className="field-control" />
+            <Button className="h-10 rounded-xl bg-white text-slate-950 hover:bg-slate-200">Filtrar</Button>
           </form>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -97,13 +98,13 @@ export default async function ReportsPage({
             <FinancialCard title="Média de gastos" value={formatCurrency(summary.averageExpense)} description="Ticket médio de despesas" />
           </div>
 
-          <div className="mt-8 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+          <div className="table-shell mt-8">
             {transactions.length === 0 ? (
-              <div className="p-10 text-center text-sm text-zinc-400">Nenhum dado encontrado para este relatório.</div>
+              <div className="empty-state m-6">Nenhum dado encontrado para este relatório.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[820px] text-sm">
-                  <thead className="bg-zinc-800/80 text-zinc-300">
+                  <thead className="table-head">
                     <tr>
                       <th className="p-4 text-left">Data</th>
                       <th className="p-4 text-left">Título</th>
@@ -114,12 +115,12 @@ export default async function ReportsPage({
                   </thead>
                   <tbody>
                     {transactions.map((transaction) => (
-                      <tr key={transaction.id} className="border-t border-zinc-800">
-                        <td className="p-4 text-zinc-400">{formatDate(transaction.date)}</td>
-                        <td className="p-4">{transaction.title}</td>
-                        <td className="p-4 text-zinc-300">{transaction.category.name}</td>
-                        <td className="p-4 text-zinc-300">{transaction.type === "income" ? "Receita" : "Despesa"}</td>
-                        <td className={`p-4 text-right font-semibold ${transaction.type === "income" ? "text-emerald-400" : "text-red-400"}`}>
+                      <tr key={transaction.id} className="table-row">
+                        <td className="p-4 text-slate-400">{formatDate(transaction.date)}</td>
+                        <td className="p-4 font-medium text-white">{transaction.title}</td>
+                        <td className="p-4 text-slate-300">{transaction.category.name}</td>
+                        <td className="p-4 text-slate-300">{transaction.type === "income" ? "Receita" : "Despesa"}</td>
+                        <td className={`p-4 text-right font-semibold ${transaction.type === "income" ? "text-emerald-300" : "text-rose-300"}`}>
                           {transaction.type === "income" ? "+" : "-"} {formatCurrency(transaction.amount)}
                         </td>
                       </tr>

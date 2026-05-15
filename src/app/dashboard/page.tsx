@@ -88,16 +88,25 @@ export default async function DashboardPage() {
   ].filter(Boolean);
 
   return (
-    <main className="flex min-h-screen bg-zinc-950">
+    <main className="app-shell">
       <Sidebar />
 
-      <div className="min-w-0 flex-1">
+      <div className="app-main">
         <Topbar title="Dashboard" userName={user.name} />
 
-        <div className="p-4 md:p-8">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold text-white">Visão financeira</h1>
-            <p className="text-zinc-400">Monitore seu saldo, receitas, despesas e metas em tempo real.</p>
+        <div className="page-container">
+          <div className="page-header">
+            <div>
+              <p className="page-kicker">Central financeira</p>
+              <h1 className="page-title">Visão financeira</h1>
+              <p className="page-description">Monitore saldo, receitas, despesas, metas e alertas com uma visão executiva dos seus dados.</p>
+            </div>
+            <div className="surface-card px-5 py-4 text-right">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Mês atual</p>
+              <p className="mt-1 text-sm font-medium capitalize text-slate-200">
+                {new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(today)}
+              </p>
+            </div>
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -107,24 +116,29 @@ export default async function DashboardPage() {
             <FinancialCard title="Economia do mês" value={formatCurrency(monthSavings)} description="Receitas menos despesas do mês" variant={monthSavings >= 0 ? "income" : "expense"} />
           </div>
 
-          <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.8fr)]">
+          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(360px,0.8fr)]">
             <FinancialChart data={chartData} />
 
-            <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="size-5 text-amber-300" />
-                <h2 className="text-xl font-semibold text-white">Alertas importantes</h2>
+            <section className="surface-panel">
+              <div className="flex items-center gap-3">
+                <span className="grid size-10 place-items-center rounded-2xl bg-amber-300/10 text-amber-300">
+                  <AlertTriangle className="size-5" />
+                </span>
+                <div>
+                  <p className="page-kicker">Risco</p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-tight text-white">Alertas importantes</h2>
+                </div>
               </div>
 
               <div className="mt-5 space-y-3">
                 {alerts.length > 0 ? (
                   alerts.map((alert) => (
-                    <div key={alert} className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-100">
+                    <div key={alert} className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4 text-sm leading-6 text-amber-100">
                       {alert}
                     </div>
                   ))
                 ) : (
-                  <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-100">
+                  <div className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4 text-sm leading-6 text-emerald-100">
                     Nenhum alerta crítico no momento.
                   </div>
                 )}
@@ -132,38 +146,41 @@ export default async function DashboardPage() {
             </section>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-6">
             <ExpenseCategoryChart data={expensesByCategory} />
           </div>
 
-          <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(360px,0.8fr)]">
             <RecentTransactions transactions={transactions.slice(0, 5)} />
 
-            <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-              <div className="flex items-center gap-2">
-                <Target className="size-5 text-sky-300" />
-                <h2 className="text-xl font-semibold text-white">Metas em progresso</h2>
+            <section className="surface-panel">
+              <div className="flex items-center gap-3">
+                <span className="grid size-10 place-items-center rounded-2xl bg-sky-300/10 text-sky-300">
+                  <Target className="size-5" />
+                </span>
+                <div>
+                  <p className="page-kicker">Objetivos</p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-tight text-white">Metas em progresso</h2>
+                </div>
               </div>
 
               <div className="mt-5 space-y-4">
                 {goals.length === 0 ? (
-                  <div className="rounded-lg border border-dashed border-zinc-800 p-6 text-center text-sm text-zinc-400">
-                    Cadastre sua primeira meta financeira.
-                  </div>
+                  <div className="empty-state">Cadastre sua primeira meta financeira.</div>
                 ) : (
                   goals.map((goal) => {
                     const progress = Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100));
 
                     return (
-                      <div key={goal.id} className="space-y-2">
+                      <div key={goal.id} className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-4">
                         <div className="flex items-center justify-between gap-3 text-sm">
                           <span className="font-medium text-white">{goal.title}</span>
-                          <span className="text-zinc-400">{progress}%</span>
+                          <span className="text-slate-400">{progress}%</span>
                         </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
-                          <div className="h-full rounded-full bg-emerald-400" style={{ width: `${progress}%` }} />
+                        <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.08]">
+                          <div className="h-full rounded-full bg-emerald-300" style={{ width: `${progress}%` }} />
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-zinc-400">
+                        <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
                           <PiggyBank className="size-3" />
                           {formatCurrency(goal.currentAmount)} de {formatCurrency(goal.targetAmount)}
                         </div>

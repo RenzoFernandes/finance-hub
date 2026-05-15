@@ -22,26 +22,29 @@ export default async function CategoriesPage() {
   });
 
   return (
-    <main className="flex min-h-screen bg-zinc-950">
+    <main className="app-shell">
       <Sidebar />
 
-      <div className="min-w-0 flex-1">
+      <div className="app-main">
         <Topbar title="Categorias" userName={user.name} />
 
-        <div className="p-4 text-white md:p-8">
-          <div>
-            <h1 className="text-3xl font-bold">Categorias</h1>
-            <p className="mt-2 text-zinc-400">Organize receitas e despesas com cores para leitura rápida.</p>
+        <div className="page-container">
+          <div className="page-header">
+            <div>
+              <p className="page-kicker">Taxonomia</p>
+              <h1 className="page-title">Categorias</h1>
+              <p className="page-description">Organize receitas e despesas com cores consistentes para facilitar análise e relatórios.</p>
+            </div>
           </div>
 
-          <form action={createCategoryAction} className="mt-8 grid gap-4 rounded-xl border border-zinc-800 bg-zinc-900 p-6 md:grid-cols-[1fr_180px_120px_auto]">
-            <Input name="name" placeholder="Nome da categoria" className="h-11 border-zinc-800 bg-zinc-950 text-white" required />
-            <select name="type" className="h-11 rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-white outline-none">
+          <form action={createCategoryAction} className="surface-panel mt-8 grid gap-4 md:grid-cols-[1fr_180px_120px_auto]">
+            <Input name="name" placeholder="Nome da categoria" className="field-control h-11" required />
+            <select name="type" className="field-control h-11">
               <option value="expense">Despesa</option>
               <option value="income">Receita</option>
             </select>
-            <Input name="color" type="color" defaultValue="#22c55e" className="h-11 border-zinc-800 bg-zinc-950 p-1" aria-label="Cor da categoria" />
-            <Button className="h-11 bg-emerald-500 text-zinc-950 hover:bg-emerald-400">
+            <Input name="color" type="color" defaultValue="#22c55e" className="field-control h-11 p-1" aria-label="Cor da categoria" />
+            <Button className="h-11 rounded-xl bg-emerald-300 font-semibold text-slate-950 hover:bg-emerald-200">
               <Plus />
               Criar
             </Button>
@@ -49,35 +52,27 @@ export default async function CategoriesPage() {
 
           <section className="mt-8 grid gap-4 lg:grid-cols-2">
             {categories.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-900 p-10 text-center text-sm text-zinc-400">
-                Nenhuma categoria cadastrada.
-              </div>
+              <div className="empty-state">Nenhuma categoria cadastrada.</div>
             ) : (
               categories.map((category) => (
-                <div key={category.id} className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+                <div key={category.id} className="surface-card p-5">
                   <form action={updateCategoryAction} className="grid gap-4 md:grid-cols-[1fr_150px_90px]">
                     <input type="hidden" name="id" value={category.id} />
-                    <Input name="name" defaultValue={category.name} className="h-10 border-zinc-800 bg-zinc-950 text-white" />
-                    <select
-                      name="type"
-                      defaultValue={category.type}
-                      className="h-10 rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-white outline-none"
-                    >
+                    <Input name="name" defaultValue={category.name} className="field-control h-10" />
+                    <select name="type" defaultValue={category.type} className="field-control h-10">
                       <option value="expense">Despesa</option>
                       <option value="income">Receita</option>
                     </select>
-                    <Input name="color" type="color" defaultValue={category.color} className="h-10 border-zinc-800 bg-zinc-950 p-1" />
+                    <Input name="color" type="color" defaultValue={category.color} className="field-control h-10 p-1" />
 
                     <div className="flex items-center justify-between gap-3 md:col-span-3">
-                      <div className="flex items-center gap-2 text-sm text-zinc-400">
+                      <div className="flex items-center gap-2 text-sm text-slate-400">
                         <span className="size-3 rounded-full" style={{ backgroundColor: category.color }} />
                         {category.type === "income" ? "Receita" : "Despesa"} · {category._count.transactions} transações
                       </div>
-                      <div className="flex gap-2">
-                        <Button type="submit" variant="outline" className="border-zinc-700 bg-zinc-950 text-white hover:bg-zinc-800">
-                          Salvar
-                        </Button>
-                      </div>
+                      <Button type="submit" variant="outline" className="rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08]">
+                        Salvar
+                      </Button>
                     </div>
                   </form>
 
@@ -86,6 +81,7 @@ export default async function CategoriesPage() {
                     <Button
                       type="submit"
                       variant="destructive"
+                      className="rounded-xl"
                       disabled={category._count.transactions > 0}
                       title={category._count.transactions > 0 ? "Remova ou altere as transações antes de excluir." : "Excluir categoria"}
                     >

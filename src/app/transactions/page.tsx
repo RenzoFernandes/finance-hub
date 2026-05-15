@@ -88,20 +88,21 @@ export default async function TransactionsPage({
   const query = new URLSearchParams(Object.entries(params).filter((entry): entry is [string, string] => Boolean(entry[1])));
 
   return (
-    <main className="flex min-h-screen bg-zinc-950">
+    <main className="app-shell">
       <Sidebar />
 
-      <div className="min-w-0 flex-1">
+      <div className="app-main">
         <Topbar title="Transações" userName={user.name} />
 
-        <div className="p-4 text-white md:p-8">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="page-container">
+          <div className="page-header">
             <div>
-              <h1 className="text-3xl font-bold">Transações</h1>
-              <p className="mt-2 text-zinc-400">Gerencie, filtre, edite e exporte suas movimentações.</p>
+              <p className="page-kicker">Operações</p>
+              <h1 className="page-title">Transações</h1>
+              <p className="page-description">Gerencie, filtre, edite e exporte suas movimentações com uma tabela operacional clara.</p>
             </div>
 
-            <Button asChild variant="outline" className="h-10 border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">
+            <Button asChild variant="outline" className="h-11 rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08]">
               <Link href={`/api/export/transactions?${query.toString()}`}>
                 <Download />
                 Exportar CSV
@@ -111,14 +112,14 @@ export default async function TransactionsPage({
 
           <TransactionForm categories={categories} />
 
-          <form className="mt-8 grid gap-3 rounded-xl border border-zinc-800 bg-zinc-900 p-4 md:grid-cols-2 xl:grid-cols-[1fr_160px_220px_120px_120px_auto]">
-            <Input name="q" defaultValue={params.q} placeholder="Buscar por título ou descrição" className="h-10 border-zinc-800 bg-zinc-950 text-white" />
-            <select name="type" defaultValue={params.type ?? ""} className="h-10 rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-white outline-none">
+          <form className="surface-panel mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-[1fr_160px_220px_120px_120px_auto]">
+            <Input name="q" defaultValue={params.q} placeholder="Buscar por título ou descrição" className="field-control" />
+            <select name="type" defaultValue={params.type ?? ""} className="field-control">
               <option value="">Todos os tipos</option>
               <option value="income">Receitas</option>
               <option value="expense">Despesas</option>
             </select>
-            <select name="categoryId" defaultValue={params.categoryId ?? ""} className="h-10 rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-white outline-none">
+            <select name="categoryId" defaultValue={params.categoryId ?? ""} className="field-control">
               <option value="">Todas as categorias</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
@@ -126,7 +127,7 @@ export default async function TransactionsPage({
                 </option>
               ))}
             </select>
-            <select name="month" defaultValue={params.month ?? ""} className="h-10 rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-white outline-none">
+            <select name="month" defaultValue={params.month ?? ""} className="field-control">
               <option value="">Mês</option>
               {Array.from({ length: 12 }).map((_, index) => (
                 <option key={index + 1} value={index + 1}>
@@ -134,7 +135,7 @@ export default async function TransactionsPage({
                 </option>
               ))}
             </select>
-            <select name="year" defaultValue={params.year ?? ""} className="h-10 rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-white outline-none">
+            <select name="year" defaultValue={params.year ?? ""} className="field-control">
               <option value="">Ano</option>
               {years.map((item) => (
                 <option key={item} value={item}>
@@ -142,16 +143,16 @@ export default async function TransactionsPage({
                 </option>
               ))}
             </select>
-            <Button className="h-10 bg-zinc-100 text-zinc-950 hover:bg-white">Filtrar</Button>
+            <Button className="h-10 rounded-xl bg-white text-slate-950 hover:bg-slate-200">Filtrar</Button>
           </form>
 
-          <div className="mt-8 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+          <div className="table-shell mt-8">
             {transactions.length === 0 ? (
-              <div className="p-10 text-center text-sm text-zinc-400">Nenhuma transação encontrada para os filtros selecionados.</div>
+              <div className="empty-state m-6">Nenhuma transação encontrada para os filtros selecionados.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[980px] text-sm">
-                  <thead className="bg-zinc-800/80 text-zinc-300">
+                  <thead className="table-head">
                     <tr>
                       <th className="p-4 text-left">Título</th>
                       <th className="p-4 text-left">Categoria</th>
@@ -164,21 +165,16 @@ export default async function TransactionsPage({
 
                   <tbody>
                     {transactions.map((transaction) => (
-                      <tr key={transaction.id} className="border-t border-zinc-800 align-top">
+                      <tr key={transaction.id} className="table-row align-top">
                         <td className="p-4">
                           <form id={`transaction-${transaction.id}`} action={updateTransactionAction} className="space-y-2">
                             <input type="hidden" name="id" value={transaction.id} />
-                            <Input name="title" defaultValue={transaction.title} className="h-9 border-zinc-800 bg-zinc-950 text-white" />
-                            <Input name="description" defaultValue={transaction.description ?? ""} placeholder="Descrição" className="h-9 border-zinc-800 bg-zinc-950 text-white" />
+                            <Input name="title" defaultValue={transaction.title} className="field-control h-9" />
+                            <Input name="description" defaultValue={transaction.description ?? ""} placeholder="Descrição" className="field-control h-9" />
                           </form>
                         </td>
                         <td className="p-4">
-                          <select
-                            form={`transaction-${transaction.id}`}
-                            name="categoryId"
-                            defaultValue={transaction.categoryId}
-                            className="h-9 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-white outline-none"
-                          >
+                          <select form={`transaction-${transaction.id}`} name="categoryId" defaultValue={transaction.categoryId} className="field-control h-9 w-full">
                             {categories
                               .filter((category) => category.type === transaction.type)
                               .map((category) => (
@@ -189,16 +185,11 @@ export default async function TransactionsPage({
                           </select>
                         </td>
                         <td className="p-4">
-                          <Input form={`transaction-${transaction.id}`} name="date" type="date" defaultValue={formatDateInput(transaction.date)} className="h-9 border-zinc-800 bg-zinc-950 text-white" />
-                          <p className="mt-2 text-xs text-zinc-500">{formatDate(transaction.date)}</p>
+                          <Input form={`transaction-${transaction.id}`} name="date" type="date" defaultValue={formatDateInput(transaction.date)} className="field-control h-9" />
+                          <p className="mt-2 text-xs text-slate-500">{formatDate(transaction.date)}</p>
                         </td>
                         <td className="p-4">
-                          <select
-                            form={`transaction-${transaction.id}`}
-                            name="type"
-                            defaultValue={transaction.type}
-                            className="h-9 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-white outline-none"
-                          >
+                          <select form={`transaction-${transaction.id}`} name="type" defaultValue={transaction.type} className="field-control h-9 w-full">
                             <option value="income">Receita</option>
                             <option value="expense">Despesa</option>
                           </select>
@@ -211,19 +202,19 @@ export default async function TransactionsPage({
                             min="0.01"
                             step="0.01"
                             defaultValue={transaction.amount}
-                            className="ml-auto h-9 w-32 border-zinc-800 bg-zinc-950 text-right text-white"
+                            className="field-control ml-auto h-9 w-32 text-right"
                           />
-                          <p className={`mt-2 font-semibold ${transaction.type === "income" ? "text-emerald-400" : "text-red-400"}`}>
+                          <p className={`mt-2 font-semibold ${transaction.type === "income" ? "text-emerald-300" : "text-rose-300"}`}>
                             {transaction.type === "income" ? "+" : "-"} {formatCurrency(transaction.amount)}
                           </p>
                         </td>
                         <td className="space-y-2 p-4 text-right">
-                          <Button form={`transaction-${transaction.id}`} type="submit" variant="outline" className="w-full border-zinc-700 bg-zinc-950 text-white hover:bg-zinc-800">
+                          <Button form={`transaction-${transaction.id}`} type="submit" variant="outline" className="w-full rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08]">
                             Salvar
                           </Button>
                           <form action={deleteTransactionAction}>
                             <input type="hidden" name="id" value={transaction.id} />
-                            <Button type="submit" variant="destructive" className="w-full">
+                            <Button type="submit" variant="destructive" className="w-full rounded-xl">
                               <Trash2 />
                               Excluir
                             </Button>

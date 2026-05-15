@@ -80,19 +80,22 @@ export function TransactionForm({ categories }: TransactionFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-8 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-      <div>
-        <h2 className="text-2xl font-semibold text-white">Nova transação</h2>
-        <p className="mt-1 text-sm text-zinc-400">Registre receitas e despesas com categoria e data.</p>
+    <form onSubmit={handleSubmit} className="surface-panel mt-8">
+      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="page-kicker">Lançamento</p>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight text-white">Nova transação</h2>
+        </div>
+        <p className="max-w-md text-sm leading-6 text-slate-400">Registre receitas e despesas com categoria, data e descrição opcional.</p>
       </div>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
+      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <Input
           type="text"
           placeholder="Título"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          className="h-11 border-zinc-800 bg-zinc-950 text-white"
+          className="field-control h-11"
           required
         />
 
@@ -101,7 +104,7 @@ export function TransactionForm({ categories }: TransactionFormProps) {
           placeholder="Valor"
           value={amount}
           onChange={(event) => setAmount(event.target.value)}
-          className="h-11 border-zinc-800 bg-zinc-950 text-white"
+          className="field-control h-11"
           min="0.01"
           step="0.01"
           required
@@ -113,18 +116,13 @@ export function TransactionForm({ categories }: TransactionFormProps) {
             setType(event.target.value as "income" | "expense");
             setCategoryId("");
           }}
-          className="h-11 rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-white outline-none focus:border-zinc-600"
+          className="field-control h-11"
         >
           <option value="income">Receita</option>
           <option value="expense">Despesa</option>
         </select>
 
-        <select
-          value={categoryId}
-          onChange={(event) => setCategoryId(event.target.value)}
-          className="h-11 rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-white outline-none focus:border-zinc-600"
-          required
-        >
+        <select value={categoryId} onChange={(event) => setCategoryId(event.target.value)} className="field-control h-11" required>
           <option value="">Selecione uma categoria</option>
           {filteredCategories.map((category) => (
             <option key={category.id} value={category.id}>
@@ -133,31 +131,27 @@ export function TransactionForm({ categories }: TransactionFormProps) {
           ))}
         </select>
 
-        <Input
-          type="date"
-          value={date}
-          onChange={(event) => setDate(event.target.value)}
-          className="h-11 border-zinc-800 bg-zinc-950 text-white"
-          required
-        />
+        <Input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="field-control h-11" required />
 
         <Input
           type="text"
           placeholder="Descrição opcional"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          className="h-11 border-zinc-800 bg-zinc-950 text-white"
+          className="field-control h-11"
         />
       </div>
 
-      <Button
-        type="submit"
-        disabled={isLoading || filteredCategories.length === 0}
-        className="mt-6 h-11 bg-emerald-500 px-5 text-zinc-950 hover:bg-emerald-400"
-      >
-        {isLoading ? <Loader2 className="animate-spin" /> : <Plus />}
-        Salvar transação
-      </Button>
+      <div className="mt-6 flex justify-end">
+        <Button
+          type="submit"
+          disabled={isLoading || filteredCategories.length === 0}
+          className="h-11 rounded-xl bg-emerald-300 px-5 font-semibold text-slate-950 hover:bg-emerald-200"
+        >
+          {isLoading ? <Loader2 className="animate-spin" /> : <Plus />}
+          Salvar transação
+        </Button>
+      </div>
     </form>
   );
 }
