@@ -1,4 +1,5 @@
 import { AlertTriangle, PiggyBank, Target } from "lucide-react";
+import { ExpenseCategoryChart } from "@/components/dashboard/expense-category-chart";
 import { FinancialCard } from "@/components/dashboard/financial-card";
 import { FinancialChart } from "@/components/dashboard/financial-chart";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
@@ -62,6 +63,20 @@ export default async function DashboardPage() {
       despesas: monthlyTransactions.filter((transaction) => transaction.type === "expense").reduce((acc, transaction) => acc + transaction.amount, 0),
     };
   });
+  const expensesByCategory = Object.values(
+    transactions
+      .filter((transaction) => transaction.type === "expense")
+      .reduce<Record<string, { name: string; value: number; color: string }>>((acc, transaction) => {
+        const key = transaction.category.id;
+        acc[key] = acc[key] ?? {
+          name: transaction.category.name,
+          value: 0,
+          color: transaction.category.color,
+        };
+        acc[key].value += transaction.amount;
+        return acc;
+      }, {})
+  ).sort((a, b) => b.value - a.value);
 
   const alerts = [
     balance < 0 ? "Seu saldo está negativo. Revise os gastos recentes." : null,
@@ -115,6 +130,10 @@ export default async function DashboardPage() {
                 )}
               </div>
             </section>
+          </div>
+
+          <div className="mt-8">
+            <ExpenseCategoryChart data={expensesByCategory} />
           </div>
 
           <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
