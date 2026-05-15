@@ -90,20 +90,20 @@ export function DashboardFilter() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative w-full sm:w-auto">
       <Button 
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         variant="outline" 
-        className="h-10 gap-2 rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08]"
+        className="h-10 w-full justify-between gap-2 rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08] sm:w-auto"
       >
         <CalendarIcon className="size-4" />
-        {buttonLabel}
+        <span className="min-w-0 truncate">{buttonLabel}</span>
         <ChevronDown className="size-4 text-slate-400" />
       </Button>
 
       {isOpen && (
-        <div className="absolute right-0 top-12 z-50 w-[320px] rounded-2xl border border-white/10 bg-slate-900 p-4 shadow-xl">
+        <div className="absolute right-0 top-12 z-50 w-[calc(100vw-2rem)] max-w-[320px] rounded-2xl border border-white/10 bg-slate-900 p-4 shadow-xl">
           <p className="mb-3 text-xs font-medium uppercase tracking-wider text-slate-400">Períodos rápidos</p>
           <div className="grid grid-cols-2 gap-2">
             <Button size="sm" variant="outline" onClick={() => handlePreset("month")} className="border-white/10 bg-transparent text-slate-300 hover:bg-white/5 hover:text-white">Mês</Button>
@@ -117,7 +117,7 @@ export function DashboardFilter() {
 
           <p className="mb-3 text-xs font-medium uppercase tracking-wider text-slate-400">Personalizado</p>
           <form onSubmit={handleCustom} className="space-y-3">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-xs text-slate-500">Início</label>
                 <Input type="date" value={start} onChange={(e) => setStart(e.target.value)} className="h-9 field-control text-sm" required />

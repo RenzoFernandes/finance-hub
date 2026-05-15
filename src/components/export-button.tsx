@@ -57,7 +57,7 @@ export function ExportButton({ queryString }: { queryString: string }) {
       onClick={handleExport}
       disabled={isExporting}
       variant="outline" 
-      className="h-11 rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08]"
+      className="h-11 w-full rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08] sm:w-auto"
     >
       <Download className={`mr-2 size-4 ${isExporting ? "animate-bounce" : ""}`} />
       {isExporting ? "Exportando..." : "Exportar CSV"}

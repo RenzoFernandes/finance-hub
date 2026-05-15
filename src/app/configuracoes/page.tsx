@@ -24,7 +24,7 @@ export default async function SettingsPage({
         <Topbar title="Configurações" userName={user.name} />
 
         <div className="page-container max-w-4xl">
-          <div className="page-header mb-10">
+          <div className="page-header mb-8 sm:mb-10">
             <div>
               <p className="page-kicker">Gerenciamento</p>
               <h1 className="page-title">Configurações de Conta</h1>
@@ -32,10 +32,10 @@ export default async function SettingsPage({
             </div>
           </div>
 
-          <div className="grid gap-8">
+          <div className="grid gap-6 sm:gap-8">
             {/* Seção: Alterar Senha */}
-            <div className="surface-card p-6 md:p-8">
-              <div className="mb-6 flex items-center gap-3">
+            <div className="surface-card p-5 sm:p-6 md:p-8">
+              <div className="mb-6 flex items-start gap-3 sm:items-center">
                 <span className="grid size-10 place-items-center rounded-xl bg-white/[0.04] text-slate-300">
                   <Lock className="size-5" />
                 </span>
@@ -59,7 +59,7 @@ export default async function SettingsPage({
                 </div>
               )}
 
-              <form action={changePasswordAction} className="grid gap-4 max-w-md">
+              <form action={changePasswordAction} className="grid max-w-md gap-4">
                 <Input
                   name="currentPassword"
                   type="password"
@@ -97,10 +97,10 @@ export default async function SettingsPage({
             </div>
 
             {/* Seção: Excluir Conta */}
-            <div className="surface-card relative overflow-hidden border-rose-500/10 p-6 shadow-rose-900/10 md:p-8">
+            <div className="surface-card relative overflow-hidden border-rose-500/10 p-5 shadow-rose-900/10 sm:p-6 md:p-8">
               <div className="absolute left-0 top-0 h-full w-1 bg-rose-500/50" />
               
-              <div className="mb-6 flex items-center gap-3">
+              <div className="mb-6 flex items-start gap-3 sm:items-center">
                 <span className="grid size-10 place-items-center rounded-xl bg-rose-500/10 text-rose-400">
                   <ShieldAlert className="size-5" />
                 </span>
@@ -116,7 +116,7 @@ export default async function SettingsPage({
                   <p>Como medida de segurança coletiva, a exclusão da conta demo está bloqueada.</p>
                 </div>
               ) : (
-                <form action={deleteAccountAction} className="grid gap-4 max-w-md rounded-xl border border-rose-500/20 bg-rose-500/[0.02] p-5">
+                <form action={deleteAccountAction} className="grid max-w-md gap-4 rounded-xl border border-rose-500/20 bg-rose-500/[0.02] p-4 sm:p-5">
                   <p className="text-sm text-slate-300 mb-2">
                     Atenção: Essa ação é <strong>irreversível</strong>. Todas as suas transações, categorias e metas serão apagadas para sempre do banco de dados.
                   </p>

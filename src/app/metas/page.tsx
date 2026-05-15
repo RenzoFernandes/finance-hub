@@ -55,12 +55,12 @@ export default async function GoalsPage() {
             </div>
           </div>
 
-          <form action={createGoalAction} className="surface-panel mt-8 grid gap-4 lg:grid-cols-[1fr_160px_160px_160px_auto]">
+          <form action={createGoalAction} className="surface-panel mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_160px_160px_160px_auto]">
             <Input name="title" placeholder="Nome da meta" className="field-control h-11" required />
             <Input name="targetAmount" type="number" min="0.01" step="0.01" placeholder="Valor alvo" className="field-control h-11" required />
             <Input name="currentAmount" type="number" min="0" step="0.01" placeholder="Valor atual" className="field-control h-11" />
             <Input name="deadline" type="date" className="field-control h-11" required />
-            <Button className="h-11 rounded-xl bg-emerald-300 font-semibold text-slate-950 hover:bg-emerald-200">
+            <Button className="h-11 rounded-xl bg-emerald-300 font-semibold text-slate-950 hover:bg-emerald-200 sm:col-span-2 xl:col-span-1">
               <Plus />
               Criar
             </Button>
@@ -75,20 +75,20 @@ export default async function GoalsPage() {
                 const isNearDeadline = goal.status !== "completed" && goal.deadline <= nearDeadline;
 
                 return (
-                  <article key={goal.id} className="surface-card p-5">
+                  <article key={goal.id} className="surface-card p-4 sm:p-5">
                     <form action={updateGoalAction} className="grid gap-4 md:grid-cols-2">
                       <input type="hidden" name="id" value={goal.id} />
                       <Input name="title" defaultValue={goal.title} className="field-control h-10 md:col-span-2" />
                       <Input name="targetAmount" type="number" min="0.01" step="0.01" defaultValue={goal.targetAmount} className="field-control h-10" />
                       <Input name="currentAmount" type="number" min="0" step="0.01" defaultValue={goal.currentAmount} className="field-control h-10" />
                       <Input name="deadline" type="date" defaultValue={formatDateInput(goal.deadline)} className="field-control h-10" />
-                      <Button type="submit" variant="outline" className="rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08]">
+                      <Button type="submit" variant="outline" className="h-10 rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08]">
                         Salvar
                       </Button>
                     </form>
 
                     <div className="mt-5 space-y-3">
-                      <div className="flex items-center justify-between gap-3 text-sm">
+                      <div className="flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                         <span className="text-slate-400">
                           {formatCurrency(goal.currentAmount)} de {formatCurrency(goal.targetAmount)}
                         </span>
@@ -109,16 +109,16 @@ export default async function GoalsPage() {
                         <div className="h-full rounded-full bg-emerald-300" style={{ width: `${progress}%` }} />
                       </div>
 
-                      <div className={`flex items-center gap-2 text-sm ${isNearDeadline ? "text-amber-300" : "text-slate-400"}`}>
+                      <div className={`flex items-start gap-2 text-sm sm:items-center ${isNearDeadline ? "text-amber-300" : "text-slate-400"}`}>
                         <CalendarClock className="size-4" />
                         Prazo em {new Intl.DateTimeFormat("pt-BR").format(goal.deadline)}
                         {isNearDeadline ? " · atenção ao prazo" : ""}
                       </div>
                     </div>
 
-                    <form action={deleteGoalAction} className="mt-4 flex justify-end">
+                    <form action={deleteGoalAction} className="mt-4 flex justify-stretch sm:justify-end">
                       <input type="hidden" name="id" value={goal.id} />
-                      <Button type="submit" variant="destructive" className="rounded-xl">
+                      <Button type="submit" variant="destructive" className="h-10 w-full rounded-xl sm:w-auto">
                         <Trash2 />
                         Excluir
                       </Button>

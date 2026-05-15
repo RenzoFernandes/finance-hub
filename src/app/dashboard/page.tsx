@@ -142,21 +142,21 @@ export default async function DashboardPage({
               <h1 className="page-title">Visão financeira</h1>
               <p className="page-description">Monitore saldo, receitas, despesas, metas e alertas com uma visão executiva dos seus dados.</p>
             </div>
-            <div className="flex items-center">
+            <div className="flex w-full items-center sm:w-auto">
               <Suspense fallback={<div className="h-10 w-32 animate-pulse rounded-xl bg-white/5" />}>
                 <DashboardFilter />
               </Suspense>
             </div>
           </div>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:mt-8 xl:grid-cols-4">
             <FinancialCard title="Saldo total" value={formatCurrency(balance)} description="Saldo disponível" />
             <FinancialCard title="Receitas do período" value={formatCurrency(periodIncome)} description="Total recebido" variant="income" />
             <FinancialCard title="Despesas do período" value={formatCurrency(periodExpense)} description="Total gasto" variant="expense" />
             <FinancialCard title="Economia no período" value={formatCurrency(periodSavings)} description="Receitas menos despesas" variant={periodSavings >= 0 ? "income" : "expense"} />
           </div>
 
-          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(360px,0.8fr)]">
+          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.8fr)] 2xl:grid-cols-[minmax(0,1.6fr)_minmax(380px,0.8fr)]">
             <FinancialChart data={chartData} />
 
             <section className="surface-panel">
@@ -166,7 +166,7 @@ export default async function DashboardPage({
                 </span>
                 <div>
                   <p className="page-kicker">Risco</p>
-                  <h2 className="mt-1 text-xl font-semibold tracking-tight text-white">Alertas importantes</h2>
+                  <h2 className="mt-1 text-lg font-semibold tracking-tight text-white sm:text-xl">Alertas importantes</h2>
                 </div>
               </div>
 
@@ -190,7 +190,7 @@ export default async function DashboardPage({
             <ExpenseCategoryChart data={expensesByCategory} />
           </div>
 
-          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(360px,0.8fr)]">
+          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] 2xl:grid-cols-[minmax(0,1.25fr)_minmax(380px,0.8fr)]">
             <RecentTransactions transactions={currentPeriodTransactions.slice(0, 5)} />
 
             <section className="surface-panel">
@@ -200,7 +200,7 @@ export default async function DashboardPage({
                 </span>
                 <div>
                   <p className="page-kicker">Objetivos</p>
-                  <h2 className="mt-1 text-xl font-semibold tracking-tight text-white">Metas em progresso</h2>
+                  <h2 className="mt-1 text-lg font-semibold tracking-tight text-white sm:text-xl">Metas em progresso</h2>
                 </div>
               </div>
 

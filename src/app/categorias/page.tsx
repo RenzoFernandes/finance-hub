@@ -37,26 +37,26 @@ export default async function CategoriesPage() {
             </div>
           </div>
 
-          <form action={createCategoryAction} className="surface-panel mt-8 grid gap-4 md:grid-cols-[1fr_180px_120px_auto]">
+          <form action={createCategoryAction} className="surface-panel mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_180px_120px_auto]">
             <Input name="name" placeholder="Nome da categoria" className="field-control h-11" required />
             <select name="type" className="field-control h-11">
               <option className="bg-[#090d14] text-slate-200" value="expense">Despesa</option>
               <option className="bg-[#090d14] text-slate-200" value="income">Receita</option>
             </select>
             <Input name="color" type="color" defaultValue="#22c55e" className="field-control h-11 p-1" aria-label="Cor da categoria" />
-            <Button className="h-11 rounded-xl bg-emerald-300 font-semibold text-slate-950 hover:bg-emerald-200">
+            <Button className="h-11 rounded-xl bg-emerald-300 font-semibold text-slate-950 hover:bg-emerald-200 sm:col-span-2 lg:col-span-1">
               <Plus />
               Criar
             </Button>
           </form>
 
-          <section className="mt-8 grid gap-4 lg:grid-cols-2">
+          <section className="mt-8 grid gap-4 xl:grid-cols-2">
             {categories.length === 0 ? (
               <div className="empty-state">Nenhuma categoria cadastrada.</div>
             ) : (
               categories.map((category) => (
-                <div key={category.id} className="surface-card p-5">
-                  <form action={updateCategoryAction} className="grid gap-4 md:grid-cols-[1fr_150px_90px]">
+                <div key={category.id} className="surface-card p-4 sm:p-5">
+                  <form action={updateCategoryAction} className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_140px_80px] md:grid-cols-[minmax(0,1fr)_150px_90px]">
                     <input type="hidden" name="id" value={category.id} />
                     <Input name="name" defaultValue={category.name} className="field-control h-10" />
                     <select name="type" defaultValue={category.type} className="field-control h-10">
@@ -65,23 +65,23 @@ export default async function CategoriesPage() {
                     </select>
                     <Input name="color" type="color" defaultValue={category.color} className="field-control h-10 p-1" />
 
-                    <div className="flex items-center justify-between gap-3 md:col-span-3">
-                      <div className="flex items-center gap-2 text-sm text-slate-400">
+                    <div className="flex flex-col gap-3 sm:col-span-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex min-w-0 items-center gap-2 text-sm text-slate-400">
                         <span className="size-3 rounded-full" style={{ backgroundColor: category.color }} />
                         {category.type === "income" ? "Receita" : "Despesa"} · {category._count.transactions} transações
                       </div>
-                      <Button type="submit" variant="outline" className="rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08]">
+                      <Button type="submit" variant="outline" className="h-10 rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08] sm:w-auto">
                         Salvar
                       </Button>
                     </div>
                   </form>
 
-                  <form action={deleteCategoryAction} className="mt-3 flex justify-end">
+                  <form action={deleteCategoryAction} className="mt-3 flex justify-stretch sm:justify-end">
                     <input type="hidden" name="id" value={category.id} />
                     <Button
                       type="submit"
                       variant="destructive"
-                      className="rounded-xl"
+                      className="h-10 w-full rounded-xl sm:w-auto"
                       disabled={category._count.transactions > 0}
                       title={category._count.transactions > 0 ? "Remova ou altere as transações antes de excluir." : "Excluir categoria"}
                     >

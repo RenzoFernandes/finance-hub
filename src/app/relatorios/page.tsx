@@ -6,7 +6,6 @@ import { Topbar } from "@/components/topbar";
 import { DashboardFilter } from "@/components/dashboard/dashboard-filter";
 import { FinancialCard } from "@/components/dashboard/financial-card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { requireUser } from "@/lib/auth";
 import { buildTransactionFilters, getReportSummary } from "@/lib/report-filters";
 import { prisma } from "@/lib/prisma";
@@ -74,7 +73,7 @@ export default async function ReportsPage({
               <p className="page-description">Analise períodos, categorias e tipos de movimentação com resumo executivo e tabela detalhada.</p>
             </div>
 
-            <Button asChild variant="outline" className="h-11 rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08]">
+            <Button asChild variant="outline" className="h-11 w-full rounded-xl border-white/10 bg-white/[0.045] text-white hover:bg-white/[0.08] sm:w-auto">
               <Link href={`/api/export/report?${query.toString()}`}>
                 <Download />
                 Exportar PDF
@@ -87,7 +86,7 @@ export default async function ReportsPage({
             <input type="hidden" name="end" value={endParam || ""} />
           </form>
 
-          <div className="surface-panel relative z-20 mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-[160px_220px_auto_auto]">
+          <div className="surface-panel relative z-20 mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-[160px_220px_minmax(180px,auto)_auto]">
             <select form="filter-form" name="type" defaultValue={params.type ?? ""} className="field-control h-10">
               <option className="bg-[#090d14] text-slate-200" value="">Todos os tipos</option>
               <option className="bg-[#090d14] text-slate-200" value="income">Receitas</option>
@@ -109,7 +108,7 @@ export default async function ReportsPage({
             <Button form="filter-form" className="h-10 rounded-xl bg-white text-slate-950 hover:bg-slate-200">Filtrar</Button>
           </div>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <FinancialCard title="Total recebido" value={formatCurrency(summary.totalIncome)} description="Receitas no período" variant="income" />
             <FinancialCard title="Total gasto" value={formatCurrency(summary.totalExpense)} description="Despesas no período" variant="expense" />
             <FinancialCard title="Saldo final" value={formatCurrency(summary.finalBalance)} description="Resultado do período" variant={summary.finalBalance >= 0 ? "income" : "expense"} />
@@ -121,7 +120,7 @@ export default async function ReportsPage({
             {transactions.length === 0 ? (
               <div className="empty-state m-6">Nenhum dado encontrado para este relatório.</div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="scroll-shell">
                 <table className="w-full min-w-[820px] text-sm">
                   <thead className="table-head">
                     <tr>

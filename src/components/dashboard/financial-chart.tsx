@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -20,16 +21,42 @@ type FinancialChartProps = {
   data: ChartData[];
 };
 
+function getCompactMonthLabel(label: string) {
+  return label.split("/")[0] ?? label;
+}
+
 export function FinancialChart({ data }: FinancialChartProps) {
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [chartWidth, setChartWidth] = useState(0);
+
+  useEffect(() => {
+    if (!chartRef.current) return;
+
+    const updateWidth = () => {
+      setChartWidth(chartRef.current?.clientWidth ?? 0);
+    };
+
+    updateWidth();
+
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(chartRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
+  const isCompact = chartWidth > 0 && chartWidth < 520;
+  const isTablet = chartWidth >= 520 && chartWidth < 760;
+  const chartHeight = isCompact ? 260 : isTablet ? 300 : 320;
+
   return (
-    <section className="surface-panel">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h2 className="text-xl font-semibold tracking-tight text-white">
+    <section className="surface-panel min-w-0 overflow-hidden">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h2 className="text-lg font-semibold tracking-tight text-white sm:text-xl">
             Receitas x despesas
           </h2>
         </div>
-        <div className="flex items-center gap-4 text-xs text-slate-400">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400">
           <span className="flex items-center gap-2">
             <span className="size-2 rounded-full bg-emerald-300" />
             Receitas
@@ -41,12 +68,22 @@ export function FinancialChart({ data }: FinancialChartProps) {
         </div>
       </div>
 
-      <div className="mt-8 h-80 min-h-80 w-full min-w-0">
-        <ResponsiveContainer width="100%" height={320}>
+      <div
+        ref={chartRef}
+        className="mt-6 w-full min-w-0 sm:mt-8"
+        style={{ height: chartHeight }}
+      >
+        <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
-            barGap={8}
-            margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+            barCategoryGap={isCompact ? "24%" : "18%"}
+            barGap={isCompact ? 4 : 8}
+            margin={{
+              top: 10,
+              right: isCompact ? 4 : 10,
+              left: isCompact ? -22 : -4,
+              bottom: isCompact ? 4 : 0,
+            }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -59,14 +96,18 @@ export function FinancialChart({ data }: FinancialChartProps) {
               tickLine={false}
               axisLine={false}
               tickMargin={12}
-              tick={{ fontSize: 12 }}
+              interval={isCompact ? "preserveStartEnd" : 0}
+              minTickGap={isCompact ? 14 : 8}
+              tick={{ fontSize: isCompact ? 10 : 12 }}
+              tickFormatter={isCompact ? getCompactMonthLabel : undefined}
             />
             <YAxis
+              width={isCompact ? 42 : 54}
               stroke="#94a3b8"
               tickLine={false}
               axisLine={false}
-              tickMargin={12}
-              tick={{ fontSize: 12 }}
+              tickMargin={isCompact ? 6 : 12}
+              tick={{ fontSize: isCompact ? 10 : 12 }}
               tickFormatter={(value) =>
                 new Intl.NumberFormat("pt-BR", {
                   notation: "compact",
@@ -86,30 +127,32 @@ export function FinancialChart({ data }: FinancialChartProps) {
               labelStyle={{
                 color: "#94a3b8",
                 marginBottom: "8px",
-                fontSize: "13px",
+                fontSize: isCompact ? "12px" : "13px",
               }}
               contentStyle={{
                 backgroundColor: "#0f172a",
                 border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: "16px",
+                borderRadius: "12px",
                 color: "#fff",
                 boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
-                padding: "12px 16px",
+                padding: isCompact ? "10px 12px" : "12px 16px",
+                maxWidth: isCompact ? "220px" : "280px",
               }}
+              wrapperStyle={{ maxWidth: "calc(100vw - 32px)", outline: "none" }}
             />
             <Bar
               dataKey="receitas"
               name="Receitas"
               fill="#6ee7b7"
-              radius={[6, 6, 0, 0]}
-              maxBarSize={40}
+              radius={[5, 5, 0, 0]}
+              maxBarSize={isCompact ? 22 : 40}
             />
             <Bar
               dataKey="despesas"
               name="Despesas"
               fill="#fda4af"
-              radius={[6, 6, 0, 0]}
-              maxBarSize={40}
+              radius={[5, 5, 0, 0]}
+              maxBarSize={isCompact ? 22 : 40}
             />
           </BarChart>
         </ResponsiveContainer>

@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Download, Filter, Trash2 } from "lucide-react";
+import { Filter, Trash2 } from "lucide-react";
 import type { Prisma, TransactionType } from "@prisma/client";
 import { Suspense } from "react";
 import { deleteTransactionAction, updateTransactionAction } from "@/app/transactions/actions";
@@ -82,9 +81,6 @@ export default async function TransactionsPage({
     }),
   ]);
 
-  const years = Array.from(new Set(transactions.map((transaction) => transaction.date.getFullYear()).concat(new Date().getFullYear()))).sort(
-    (a, b) => b - a
-  );
   const query = new URLSearchParams(Object.entries(params).filter((entry): entry is [string, string] => Boolean(entry[1])));
 
   return (
@@ -102,7 +98,7 @@ export default async function TransactionsPage({
               <p className="page-description">Gerencie, filtre, edite e exporte suas movimentações com uma tabela operacional clara.</p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="responsive-actions">
               <ExportButton queryString={query.toString()} />
               <TransactionForm categories={categories} />
             </div>
@@ -119,7 +115,7 @@ export default async function TransactionsPage({
               <input type="hidden" name="end" value={params.end ?? ""} />
             </form>
             
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[1fr_160px_220px_auto_auto]">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_160px_220px_minmax(180px,auto)_auto]">
               <Input form="filter-form" name="q" defaultValue={params.q} placeholder="Buscar por título ou descrição" className="field-control h-10" />
               <select form="filter-form" name="type" defaultValue={params.type ?? ""} className="field-control h-10">
                 <option className="bg-[#090d14] text-slate-200" value="">Todos os tipos</option>
@@ -139,7 +135,7 @@ export default async function TransactionsPage({
                 <DashboardFilter />
               </Suspense>
 
-              <Button form="filter-form" type="submit" className="h-10 rounded-xl bg-white text-slate-950 hover:bg-slate-200 font-medium shadow-md">Aplicar</Button>
+              <Button form="filter-form" type="submit" className="h-10 rounded-xl bg-white font-medium text-slate-950 shadow-md hover:bg-slate-200">Aplicar</Button>
             </div>
           </div>
 
@@ -147,8 +143,8 @@ export default async function TransactionsPage({
             {transactions.length === 0 ? (
               <div className="empty-state m-6">Nenhuma transação encontrada para os filtros selecionados.</div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+              <div className="scroll-shell">
+                <table className="w-full min-w-[980px] text-sm">
                   <thead className="table-head">
                     <tr>
                       <th className="p-3 text-left font-semibold text-slate-400">Título e Descrição</th>
@@ -207,12 +203,12 @@ export default async function TransactionsPage({
                         </td>
                         <td className="p-3 text-right align-top">
                           <div className="flex flex-col items-end gap-2">
-                            <Button form={`transaction-${transaction.id}`} type="submit" variant="outline" size="sm" className="h-8 w-24 rounded-lg border-emerald-400/20 bg-emerald-400/10 text-xs font-semibold text-emerald-300 hover:bg-emerald-400/20">
+                            <Button form={`transaction-${transaction.id}`} type="submit" variant="outline" size="sm" className="h-9 w-24 rounded-lg border-emerald-400/20 bg-emerald-400/10 text-xs font-semibold text-emerald-300 hover:bg-emerald-400/20">
                               Salvar
                             </Button>
                             <form action={deleteTransactionAction}>
                               <input type="hidden" name="id" value={transaction.id} />
-                              <Button type="submit" variant="destructive" size="sm" className="h-8 w-24 rounded-lg bg-rose-500/10 text-xs font-semibold text-rose-300 hover:bg-rose-500/20">
+                              <Button type="submit" variant="destructive" size="sm" className="h-9 w-24 rounded-lg bg-rose-500/10 text-xs font-semibold text-rose-300 hover:bg-rose-500/20">
                                 <Trash2 className="mr-1.5 size-3" />
                                 Excluir
                               </Button>
