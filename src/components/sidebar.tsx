@@ -1,43 +1,37 @@
-import {
-  LayoutDashboard,
-  ArrowUpCircle,
-  Target,
-  FileText,
-  Settings,
-} from "lucide-react";
+import Link from "next/link";
+import { ArrowUpCircle, FileText, LayoutDashboard, Settings, Tags, Target } from "lucide-react";
+
+const items = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/transactions", label: "Transações", icon: ArrowUpCircle },
+  { href: "/categorias", label: "Categorias", icon: Tags },
+  { href: "/metas", label: "Metas", icon: Target },
+  { href: "/relatorios", label: "Relatórios", icon: FileText },
+  { href: "/configuracoes", label: "Configurações", icon: Settings },
+];
 
 export function Sidebar() {
   return (
-    <aside className="w-64 min-h-screen bg-zinc-900 border-r border-zinc-800 p-6">
-      <h1 className="text-3xl font-bold text-white">
+    <aside className="hidden min-h-screen w-64 border-r border-zinc-800 bg-zinc-900 p-6 lg:block">
+      <Link href="/dashboard" className="text-3xl font-bold text-white">
         FinanceHub
-      </h1>
+      </Link>
 
       <nav className="mt-10 flex flex-col gap-2">
-        <button className="flex items-center gap-3 bg-zinc-800 text-white px-4 py-3 rounded-xl transition hover:bg-zinc-700">
-          <LayoutDashboard size={20} />
-          Dashboard
-        </button>
+        {items.map((item) => {
+          const Icon = item.icon;
 
-        <button className="flex items-center gap-3 text-zinc-400 px-4 py-3 rounded-xl transition hover:bg-zinc-800 hover:text-white">
-          <ArrowUpCircle size={20} />
-          Transações
-        </button>
-
-        <button className="flex items-center gap-3 text-zinc-400 px-4 py-3 rounded-xl transition hover:bg-zinc-800 hover:text-white">
-          <Target size={20} />
-          Metas
-        </button>
-
-        <button className="flex items-center gap-3 text-zinc-400 px-4 py-3 rounded-xl transition hover:bg-zinc-800 hover:text-white">
-          <FileText size={20} />
-          Relatórios
-        </button>
-
-        <button className="flex items-center gap-3 text-zinc-400 px-4 py-3 rounded-xl transition hover:bg-zinc-800 hover:text-white">
-          <Settings size={20} />
-          Configurações
-        </button>
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-zinc-400 transition hover:bg-zinc-800 hover:text-white"
+            >
+              <Icon size={20} />
+              {item.label}
+            </Link>
+          );
+        })}
       </nav>
     </aside>
   );

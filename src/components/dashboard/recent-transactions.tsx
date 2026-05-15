@@ -1,98 +1,90 @@
-const transactions = [
-  {
-    id: 1,
-    title: "Salário",
-    category: "Receita",
-    date: "15/05/2026",
-    amount: "R$ 5.200,00",
-    type: "income",
-  },
-  {
-    id: 2,
-    title: "Mercado",
-    category: "Alimentação",
-    date: "14/05/2026",
-    amount: "R$ 320,00",
-    type: "expense",
-  },
-  {
-    id: 3,
-    title: "Freelance",
-    category: "Receita",
-    date: "12/05/2026",
-    amount: "R$ 1.500,00",
-    type: "income",
-  },
-  {
-    id: 4,
-    title: "Internet",
-    category: "Casa",
-    date: "10/05/2026",
-    amount: "R$ 120,00",
-    type: "expense",
-  },
-];
+type Transaction = {
+  id: string;
+  title: string;
+  amount: number;
+  type: "income" | "expense";
+  date: Date;
+  category: {
+    name: string;
+    color: string;
+  };
+};
 
-export function RecentTransactions() {
+type RecentTransactionsProps = {
+  transactions: Transaction[];
+};
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+}
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat("pt-BR").format(date);
+}
+
+export function RecentTransactions({ transactions }: RecentTransactionsProps) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mt-8">
+    <div className="mt-8 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
       <div>
-        <h2 className="text-xl font-semibold text-white">
-          Transações Recentes
-        </h2>
-
-        <p className="text-zinc-400 text-sm mt-1">
-          Últimas movimentações financeiras registradas
-        </p>
+        <h2 className="text-xl font-semibold text-white">Transações recentes</h2>
+        <p className="mt-1 text-sm text-zinc-400">Últimas movimentações financeiras registradas</p>
       </div>
 
-      <div className="mt-6 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-zinc-800 text-zinc-400">
-              <th className="text-left py-3">Descrição</th>
-              <th className="text-left py-3">Categoria</th>
-              <th className="text-left py-3">Data</th>
-              <th className="text-right py-3">Valor</th>
-              <th className="text-right py-3">Tipo</th>
-            </tr>
-          </thead>
+      {transactions.length === 0 ? (
+        <div className="mt-6 rounded-lg border border-dashed border-zinc-800 p-8 text-center text-sm text-zinc-400">
+          Nenhuma transação cadastrada ainda.
+        </div>
+      ) : (
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-zinc-800 text-zinc-400">
+                <th className="py-3 text-left">Descrição</th>
+                <th className="py-3 text-left">Categoria</th>
+                <th className="py-3 text-left">Data</th>
+                <th className="py-3 text-right">Valor</th>
+                <th className="py-3 text-right">Tipo</th>
+              </tr>
+            </thead>
 
-          <tbody>
-            {transactions.map((transaction) => (
-              <tr
-                key={transaction.id}
-                className="border-b border-zinc-800 last:border-0"
-              >
-                <td className="py-4 text-white">{transaction.title}</td>
-                <td className="py-4 text-zinc-400">{transaction.category}</td>
-                <td className="py-4 text-zinc-400">{transaction.date}</td>
-                <td
-                  className={`py-4 text-right font-medium ${
-                    transaction.type === "income"
-                      ? "text-green-500"
-                      : "text-red-500"
-                  }`}
-                >
-                  {transaction.type === "income" ? "+" : "-"}{" "}
-                  {transaction.amount}
-                </td>
-                <td className="py-4 text-right">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      transaction.type === "income"
-                        ? "bg-green-500/10 text-green-500"
-                        : "bg-red-500/10 text-red-500"
+            <tbody>
+              {transactions.map((transaction) => (
+                <tr key={transaction.id} className="border-b border-zinc-800 last:border-0">
+                  <td className="py-4 text-white">{transaction.title}</td>
+                  <td className="py-4 text-zinc-300">
+                    <span className="inline-flex items-center gap-2">
+                      <span className="size-2 rounded-full" style={{ backgroundColor: transaction.category.color }} />
+                      {transaction.category.name}
+                    </span>
+                  </td>
+                  <td className="py-4 text-zinc-400">{formatDate(transaction.date)}</td>
+                  <td
+                    className={`py-4 text-right font-medium ${
+                      transaction.type === "income" ? "text-emerald-400" : "text-red-400"
                     }`}
                   >
-                    {transaction.type === "income" ? "Receita" : "Despesa"}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    {transaction.type === "income" ? "+" : "-"} {formatCurrency(transaction.amount)}
+                  </td>
+                  <td className="py-4 text-right">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${
+                        transaction.type === "income"
+                          ? "bg-emerald-500/10 text-emerald-400"
+                          : "bg-red-500/10 text-red-400"
+                      }`}
+                    >
+                      {transaction.type === "income" ? "Receita" : "Despesa"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

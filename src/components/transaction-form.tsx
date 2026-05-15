@@ -1,21 +1,45 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-export function TransactionForm() {
+type CategoryOption = {
+  id: string;
+  name: string;
+  type: "income" | "expense";
+  color: string;
+};
+
+type TransactionFormProps = {
+  categories: CategoryOption[];
+};
+
+export function TransactionForm({ categories }: TransactionFormProps) {
   const router = useRouter();
-
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
-  const [type, setType] = useState("income");
-  const [category, setCategory] = useState("");
+  const [type, setType] = useState<"income" | "expense">("income");
+  const [categoryId, setCategoryId] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const filteredCategories = useMemo(
+    () => categories.filter((category) => category.type === type),
+    [categories, type]
+  );
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+
+    if (!title.trim() || Number(amount) <= 0 || !categoryId) {
+      toast.error("Preencha título, valor e categoria.");
+      return;
+    }
 
     try {
       setIsLoading(true);
@@ -29,7 +53,8 @@ export function TransactionForm() {
           title,
           amount: Number(amount),
           type,
-          category,
+          categoryId,
+          date,
           description,
         }),
       });
@@ -41,11 +66,11 @@ export function TransactionForm() {
       setTitle("");
       setAmount("");
       setType("income");
-      setCategory("");
+      setCategoryId("");
+      setDate(new Date().toISOString().slice(0, 10));
       setDescription("");
 
       toast.success("Transação criada com sucesso!");
-
       router.refresh();
     } catch {
       toast.error("Não foi possível criar a transação.");
@@ -55,64 +80,84 @@ export function TransactionForm() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mt-8"
-    >
-      <h2 className="text-2xl font-semibold text-white">Nova Transação</h2>
+    <form onSubmit={handleSubmit} className="mt-8 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+      <div>
+        <h2 className="text-2xl font-semibold text-white">Nova transação</h2>
+        <p className="mt-1 text-sm text-zinc-400">Registre receitas e despesas com categoria e data.</p>
+      </div>
 
-      <div className="grid grid-cols-2 gap-4 mt-6">
-        <input
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <Input
           type="text"
           placeholder="Título"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white outline-none"
+          onChange={(event) => setTitle(event.target.value)}
+          className="h-11 border-zinc-800 bg-zinc-950 text-white"
           required
         />
 
-        <input
+        <Input
           type="number"
           placeholder="Valor"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white outline-none"
+          onChange={(event) => setAmount(event.target.value)}
+          className="h-11 border-zinc-800 bg-zinc-950 text-white"
+          min="0.01"
+          step="0.01"
           required
         />
 
         <select
           value={type}
-          onChange={(e) => setType(e.target.value)}
-          className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white outline-none"
+          onChange={(event) => {
+            setType(event.target.value as "income" | "expense");
+            setCategoryId("");
+          }}
+          className="h-11 rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-white outline-none focus:border-zinc-600"
         >
           <option value="income">Receita</option>
           <option value="expense">Despesa</option>
         </select>
 
-        <input
-          type="text"
-          placeholder="Categoria"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white outline-none"
+        <select
+          value={categoryId}
+          onChange={(event) => setCategoryId(event.target.value)}
+          className="h-11 rounded-lg border border-zinc-800 bg-zinc-950 px-3 text-sm text-white outline-none focus:border-zinc-600"
+          required
+        >
+          <option value="">Selecione uma categoria</option>
+          {filteredCategories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+
+        <Input
+          type="date"
+          value={date}
+          onChange={(event) => setDate(event.target.value)}
+          className="h-11 border-zinc-800 bg-zinc-950 text-white"
           required
         />
 
-        <textarea
-          placeholder="Descrição"
+        <Input
+          type="text"
+          placeholder="Descrição opcional"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="col-span-2 bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white outline-none h-32 resize-none"
+          onChange={(event) => setDescription(event.target.value)}
+          className="h-11 border-zinc-800 bg-zinc-950 text-white"
         />
       </div>
 
-      <button
+      <Button
         type="submit"
-        disabled={isLoading}
-        className="mt-6 bg-green-500 hover:bg-green-600 disabled:opacity-60 disabled:cursor-not-allowed transition px-6 py-3 rounded-lg font-semibold text-black"
+        disabled={isLoading || filteredCategories.length === 0}
+        className="mt-6 h-11 bg-emerald-500 px-5 text-zinc-950 hover:bg-emerald-400"
       >
-        {isLoading ? "Salvando..." : "Salvar Transação"}
-      </button>
+        {isLoading ? <Loader2 className="animate-spin" /> : <Plus />}
+        Salvar transação
+      </Button>
     </form>
   );
 }

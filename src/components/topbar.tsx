@@ -1,12 +1,32 @@
-export function Topbar() {
-  return (
-    <header className="h-20 border-b border-zinc-800 bg-zinc-900 flex items-center justify-between px-8">
-      <h2 className="text-white text-xl font-semibold">
-        Dashboard
-      </h2>
+import { LogOut, Menu } from "lucide-react";
+import Link from "next/link";
+import { logoutAction } from "@/app/(auth)/actions";
+import { Button } from "@/components/ui/button";
 
-      <div className="text-zinc-400">
-        Bem-vindo de volta, Renzo
+type TopbarProps = {
+  title: string;
+  userName: string;
+};
+
+export function Topbar({ title, userName }: TopbarProps) {
+  return (
+    <header className="flex h-20 items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 md:px-8">
+      <div className="flex items-center gap-3">
+        <Button asChild variant="ghost" size="icon" className="text-zinc-300 lg:hidden">
+          <Link href="/dashboard" aria-label="Abrir menu">
+            <Menu />
+          </Link>
+        </Button>
+        <h2 className="text-lg font-semibold text-white md:text-xl">{title}</h2>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <div className="hidden text-sm text-zinc-400 sm:block">Bem-vindo, {userName}</div>
+        <form action={logoutAction}>
+          <Button type="submit" variant="ghost" size="icon" className="text-zinc-400 hover:text-white" aria-label="Sair">
+            <LogOut />
+          </Button>
+        </form>
       </div>
     </header>
   );
