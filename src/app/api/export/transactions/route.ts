@@ -8,8 +8,11 @@ function csvEscape(value: string | number | null | undefined) {
   return `"${text.replaceAll('"', '""')}"`;
 }
 
-function formatDate(date: Date) {
-  return date.toISOString().slice(0, 10);
+function formatCSVDate(date: Date) {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
 }
 
 export async function GET(request: Request) {
@@ -23,8 +26,19 @@ export async function GET(request: Request) {
   const type = searchParams.get("type");
   const categoryId = searchParams.get("categoryId");
   const q = searchParams.get("q");
-  const year = searchParams.get("year") ? Number(searchParams.get("year")) : undefined;
-  const month = searchParams.get("month") ? Number(searchParams.get("month")) : undefined;
+  
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+  
+  const startParam = searchParams.get("start");
+  const endParam = searchParams.get("end");
+
+  const startDate = startParam ? new Date(startParam) : new Date(currentYear, currentMonth, 1);
+  const endDate = endParam ? new Date(endParam) : new Date(today);
+
+  const queryEndDate = new Date(endDate);
+  queryEndDate.setDate(queryEndDate.getDate() + 1);
 
   const filters: Prisma.TransactionWhereInput = {
     userId: user.id,
@@ -38,11 +52,10 @@ export async function GET(request: Request) {
           ],
         }
       : {}),
-    ...(year && month
-      ? { date: { gte: new Date(year, month - 1, 1), lt: new Date(year, month, 1) } }
-      : year
-        ? { date: { gte: new Date(year, 0, 1), lt: new Date(year + 1, 0, 1) } }
-        : {}),
+    date: {
+      gte: startDate,
+      lt: queryEndDate,
+    },
   };
 
   const transactions = await prisma.transaction.findMany({
@@ -51,17 +64,73 @@ export async function GET(request: Request) {
     orderBy: { date: "desc" },
   });
 
-  const header = ["Data", "Título", "Descrição", "Tipo", "Categoria", "Valor"];
+  if (transactions.length === 0) {
+    return NextResponse.json({ error: "Nenhuma transação encontrada para os filtros selecionados." }, { status: 404 });
+  }
+
+  const totalIncome = transactions.filter(t => t.type === "income").reduce((acc, t) => acc + t.amount, 0);
+  const totalExpense = transactions.filter(t => t.type === "expense").reduce((acc, t) => acc + t.amount, 0);
+  const netBalance = totalIncome - totalExpense;
+
+  const categoryName = categoryId ? (await prisma.category.findUnique({ where: { id: categoryId } }))?.name || "Todas" : "Todas";
+  const typeName = type === "income" ? "Apenas Receitas" : type === "expense" ? "Apenas Despesas" : "Todos os lançamentos";
+  const searchName = q ? `"${q}"` : "Nenhum termo";
+  const periodName = `${formatCSVDate(startDate)} até ${formatCSVDate(endDate)}`;
+
+  const padRow = (arr: any[]) => {
+    const newArr = [...arr];
+    while (newArr.length < 6) newArr.push("");
+    return newArr;
+  };
+
+  const metaHeader = [
+    padRow(["FINANCE HUB - RELATÓRIO EXECUTIVO DE TRANSAÇÕES"]),
+    padRow([""]),
+    padRow(["[ FILTROS APLICADOS ]"]),
+    padRow(["Período de Análise:", periodName]),
+    padRow(["Filtro de Natureza:", typeName]),
+    padRow(["Filtro de Categoria:", categoryName]),
+    padRow(["Termo de Busca:", searchName]),
+    padRow([""]),
+    padRow(["[ RESUMO FINANCEIRO DO PERÍODO ]"]),
+    padRow(["Total de Receitas:", totalIncome.toFixed(2).replace('.', ',')]),
+    padRow(["Total de Despesas:", totalExpense.toFixed(2).replace('.', ',')]),
+    padRow(["Saldo Líquido:", netBalance.toFixed(2).replace('.', ',')]),
+    padRow([""]),
+    padRow(["[ DETALHAMENTO DE LANÇAMENTOS ]"])
+  ];
+
+  const header = ["ID", "Título", "Descrição", "Categoria", "Tipo", "Valor", "Data de criação"];
   const rows = transactions.map((transaction) => [
-    formatDate(transaction.date),
+    transaction.id,
     transaction.title,
-    transaction.description,
-    transaction.type === "income" ? "Receita" : "Despesa",
+    transaction.description || "-",
     transaction.category.name,
-    transaction.amount.toFixed(2),
+    transaction.type === "income" ? "Receita" : "Despesa",
+    transaction.amount.toFixed(2).replace('.', ','),
+    formatCSVDate(transaction.createdAt),
   ]);
-  const csv = [header, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
-  const filename = `financehub-transacoes-${formatDate(new Date())}.csv`;
+  
+  const BOM = "\uFEFF";
+  const csvContent = [header, ...rows].map((row) => row.map(csvEscape).join(";")).join("\n");
+  const csv = BOM + "sep=;\n" + csvContent;
+
+  let filename = `financehub-transacoes-${formatCSVDate(new Date()).replaceAll('/', '-')}.csv`;
+  const isHistoric = !startParam && !endParam;
+  
+  if (isHistoric) {
+    filename = "financehub-transacoes-historico-completo.csv";
+  } else if (startParam && endParam) {
+    const sDate = new Date(startParam);
+    const eDate = new Date(endParam);
+    const monthsDiff = (eDate.getFullYear() - sDate.getFullYear()) * 12 + eDate.getMonth() - sDate.getMonth() + 1;
+    
+    if (monthsDiff === 12) {
+      filename = `financehub-transacoes-todos-os-meses-${eDate.getFullYear()}.csv`;
+    } else if (sDate.getMonth() === eDate.getMonth() && sDate.getFullYear() === eDate.getFullYear()) {
+      filename = `financehub-transacoes-${String(sDate.getMonth() + 1).padStart(2, '0')}-${sDate.getFullYear()}.csv`;
+    }
+  }
 
   return new NextResponse(csv, {
     headers: {

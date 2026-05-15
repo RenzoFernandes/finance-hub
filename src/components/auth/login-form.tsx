@@ -27,7 +27,6 @@ export function LoginForm({ demoError }: { demoError?: boolean }) {
             name="email"
             type="email"
             autoComplete="email"
-            defaultValue="demo@financehub.com"
             className="field-control h-11"
             required
           />
@@ -42,7 +41,6 @@ export function LoginForm({ demoError }: { demoError?: boolean }) {
             name="password"
             type="password"
             autoComplete="current-password"
-            defaultValue="demo123456"
             className="field-control h-11"
             required
           />

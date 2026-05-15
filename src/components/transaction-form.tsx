@@ -6,6 +6,14 @@ import { Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 type CategoryOption = {
   id: string;
@@ -20,6 +28,7 @@ type TransactionFormProps = {
 
 export function TransactionForm({ categories }: TransactionFormProps) {
   const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [type, setType] = useState<"income" | "expense">("income");
@@ -71,6 +80,7 @@ export function TransactionForm({ categories }: TransactionFormProps) {
       setDescription("");
 
       toast.success("Transação criada com sucesso!");
+      setIsOpen(false);
       router.refresh();
     } catch {
       toast.error("Não foi possível criar a transação.");
@@ -80,78 +90,114 @@ export function TransactionForm({ categories }: TransactionFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="surface-panel mt-8">
-      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="page-kicker">Lançamento</p>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight text-white">Nova transação</h2>
-        </div>
-        <p className="max-w-md text-sm leading-6 text-slate-400">Registre receitas e despesas com categoria, data e descrição opcional.</p>
-      </div>
-
-      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <Input
-          type="text"
-          placeholder="Título"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          className="field-control h-11"
-          required
-        />
-
-        <Input
-          type="number"
-          placeholder="Valor"
-          value={amount}
-          onChange={(event) => setAmount(event.target.value)}
-          className="field-control h-11"
-          min="0.01"
-          step="0.01"
-          required
-        />
-
-        <select
-          value={type}
-          onChange={(event) => {
-            setType(event.target.value as "income" | "expense");
-            setCategoryId("");
-          }}
-          className="field-control h-11"
-        >
-          <option value="income">Receita</option>
-          <option value="expense">Despesa</option>
-        </select>
-
-        <select value={categoryId} onChange={(event) => setCategoryId(event.target.value)} className="field-control h-11" required>
-          <option value="">Selecione uma categoria</option>
-          {filteredCategories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-
-        <Input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="field-control h-11" required />
-
-        <Input
-          type="text"
-          placeholder="Descrição opcional"
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-          className="field-control h-11"
-        />
-      </div>
-
-      <div className="mt-6 flex justify-end">
-        <Button
-          type="submit"
-          disabled={isLoading || filteredCategories.length === 0}
-          className="h-11 rounded-xl bg-emerald-300 px-5 font-semibold text-slate-950 hover:bg-emerald-200"
-        >
-          {isLoading ? <Loader2 className="animate-spin" /> : <Plus />}
-          Salvar transação
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button className="h-11 gap-2 rounded-xl bg-emerald-300 font-semibold text-slate-950 shadow-xl hover:bg-emerald-200">
+          <Plus className="size-4" />
+          Nova Transação
         </Button>
-      </div>
-    </form>
+      </DialogTrigger>
+      
+      <DialogContent className="max-w-xl border-white/10 bg-[#090d14] text-white sm:rounded-2xl shadow-2xl">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold tracking-tight text-white">Nova transação</DialogTitle>
+          <DialogDescription className="text-slate-400">
+            Registre receitas e despesas com categoria, data e descrição opcional.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="mt-4">
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="col-span-2">
+              <label className="mb-1.5 block text-xs font-medium text-slate-400">Título da operação</label>
+              <Input
+                type="text"
+                placeholder="Ex: Pagamento de aluguel"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                className="field-control w-full h-11"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-slate-400">Valor (R$)</label>
+              <Input
+                type="number"
+                placeholder="0.00"
+                value={amount}
+                onChange={(event) => setAmount(event.target.value)}
+                className="field-control w-full h-11"
+                min="0.01"
+                step="0.01"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-slate-400">Tipo</label>
+              <select
+                value={type}
+                onChange={(event) => {
+                  setType(event.target.value as "income" | "expense");
+                  setCategoryId("");
+                }}
+                className="field-control w-full h-11"
+              >
+                <option className="bg-[#090d14] text-slate-200" value="income">Receita</option>
+                <option className="bg-[#090d14] text-slate-200" value="expense">Despesa</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-slate-400">Categoria</label>
+              <select value={categoryId} onChange={(event) => setCategoryId(event.target.value)} className="field-control w-full h-11" required>
+                <option className="bg-[#090d14] text-slate-200" value="">Selecione uma categoria</option>
+                {filteredCategories.map((category) => (
+                  <option className="bg-[#090d14] text-slate-200" key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-slate-400">Data</label>
+              <Input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="field-control w-full h-11" required />
+            </div>
+
+            <div className="col-span-2">
+              <label className="mb-1.5 block text-xs font-medium text-slate-400">Descrição opcional</label>
+              <Input
+                type="text"
+                placeholder="Adicione detalhes extras se necessário..."
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                className="field-control w-full h-11"
+              />
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+              className="h-11 rounded-xl border-white/10 bg-transparent text-slate-300 hover:bg-white/5 hover:text-white"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading || filteredCategories.length === 0}
+              className="h-11 rounded-xl bg-emerald-300 px-6 font-semibold text-slate-950 hover:bg-emerald-200"
+            >
+              {isLoading ? <Loader2 className="animate-spin" /> : <Plus className="mr-2 size-4" />}
+              Salvar transação
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

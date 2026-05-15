@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { AlertTriangle, PiggyBank, Target } from "lucide-react";
+import { DashboardFilter } from "@/components/dashboard/dashboard-filter";
 import { ExpenseCategoryChart } from "@/components/dashboard/expense-category-chart";
 import { FinancialCard } from "@/components/dashboard/financial-card";
 import { FinancialChart } from "@/components/dashboard/financial-chart";
@@ -16,20 +18,42 @@ function formatCurrency(value: number) {
 }
 
 function getMonthLabel(date: Date) {
-  return new Intl.DateTimeFormat("pt-BR", { month: "short" }).format(date);
+  const month = new Intl.DateTimeFormat("pt-BR", { month: "short" }).format(date).replace(".", "");
+  return `${month}/${date.getFullYear()}`;
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ start?: string; end?: string }>;
+}) {
   const user = await requireUser();
+  const params = await searchParams;
   const today = new Date();
   const nearDeadlineLimit = new Date(today);
   nearDeadlineLimit.setDate(today.getDate() + 30);
+  
   const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
 
-  const [transactions, goals] = await Promise.all([
+  const startDate = params.start ? new Date(params.start) : new Date(currentYear, currentMonth, 1);
+  const endDate = params.end ? new Date(params.end) : new Date(today); // Data atual por padrão
+
+  const queryEndDate = new Date(endDate);
+  queryEndDate.setDate(queryEndDate.getDate() + 1);
+
+  const chartStartDate = new Date(endDate.getFullYear(), endDate.getMonth() - 5, 1);
+  const earliestFetchDate = startDate < chartStartDate ? startDate : chartStartDate;
+
+  const [transactions, goals, aggregateIncome, aggregateExpense] = await Promise.all([
     prisma.transaction.findMany({
-      where: { userId: user.id },
+      where: { 
+        userId: user.id,
+        date: { 
+          gte: earliestFetchDate,
+          lt: queryEndDate
+        }
+      },
       include: { category: true },
       orderBy: { date: "desc" },
     }),
@@ -38,21 +62,37 @@ export default async function DashboardPage() {
       orderBy: { deadline: "asc" },
       take: 3,
     }),
+    prisma.transaction.aggregate({
+      _sum: { amount: true },
+      where: { userId: user.id, type: "income" }
+    }),
+    prisma.transaction.aggregate({
+      _sum: { amount: true },
+      where: { userId: user.id, type: "expense" }
+    })
   ]);
 
-  const income = transactions.filter((transaction) => transaction.type === "income").reduce((acc, transaction) => acc + transaction.amount, 0);
-  const expense = transactions.filter((transaction) => transaction.type === "expense").reduce((acc, transaction) => acc + transaction.amount, 0);
+  const income = aggregateIncome._sum.amount || 0;
+  const expense = aggregateExpense._sum.amount || 0;
   const balance = income - expense;
-  const monthIncome = transactions
-    .filter((transaction) => transaction.type === "income" && transaction.date.getMonth() === currentMonth && transaction.date.getFullYear() === currentYear)
-    .reduce((acc, transaction) => acc + transaction.amount, 0);
-  const monthExpense = transactions
-    .filter((transaction) => transaction.type === "expense" && transaction.date.getMonth() === currentMonth && transaction.date.getFullYear() === currentYear)
-    .reduce((acc, transaction) => acc + transaction.amount, 0);
-  const monthSavings = monthIncome - monthExpense;
+  
+  const currentPeriodTransactions = transactions.filter(
+    (transaction) => transaction.date >= startDate && transaction.date < queryEndDate
+  );
 
-  const chartData = Array.from({ length: 6 }).map((_, index) => {
-    const date = new Date(currentYear, currentMonth - 5 + index, 1);
+  const periodIncome = currentPeriodTransactions
+    .filter((transaction) => transaction.type === "income")
+    .reduce((acc, transaction) => acc + transaction.amount, 0);
+  const periodExpense = currentPeriodTransactions
+    .filter((transaction) => transaction.type === "expense")
+    .reduce((acc, transaction) => acc + transaction.amount, 0);
+  const periodSavings = periodIncome - periodExpense;
+
+  const monthsDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12 + endDate.getMonth() - startDate.getMonth() + 1;
+  const actualChartMonths = Math.min(12, Math.max(6, monthsDiff));
+
+  const chartData = Array.from({ length: actualChartMonths }).map((_, index) => {
+    const date = new Date(endDate.getFullYear(), endDate.getMonth() - actualChartMonths + 1 + index, 1);
     const monthlyTransactions = transactions.filter(
       (transaction) => transaction.date.getMonth() === date.getMonth() && transaction.date.getFullYear() === date.getFullYear()
     );
@@ -63,8 +103,9 @@ export default async function DashboardPage() {
       despesas: monthlyTransactions.filter((transaction) => transaction.type === "expense").reduce((acc, transaction) => acc + transaction.amount, 0),
     };
   });
+  
   const expensesByCategory = Object.values(
-    transactions
+    currentPeriodTransactions
       .filter((transaction) => transaction.type === "expense")
       .reduce<Record<string, { name: string; value: number; color: string }>>((acc, transaction) => {
         const key = transaction.category.id;
@@ -79,9 +120,9 @@ export default async function DashboardPage() {
   ).sort((a, b) => b.value - a.value);
 
   const alerts = [
-    balance < 0 ? "Seu saldo está negativo. Revise os gastos recentes." : null,
-    monthExpense > monthIncome ? "As despesas do mês superaram as receitas." : null,
-    monthExpense > monthIncome * 0.8 && monthIncome > 0 ? "Seu gasto mensal já passou de 80% das receitas." : null,
+    balance < 0 ? "Seu saldo total está negativo. Revise os gastos recentes." : null,
+    periodExpense > periodIncome ? "As despesas do período superaram as receitas." : null,
+    periodExpense > periodIncome * 0.8 && periodIncome > 0 ? "Seu gasto no período já passou de 80% das receitas." : null,
     goals.some((goal) => goal.status !== "completed" && goal.deadline <= nearDeadlineLimit)
       ? "Há metas próximas do prazo nos próximos 30 dias."
       : null,
@@ -101,19 +142,18 @@ export default async function DashboardPage() {
               <h1 className="page-title">Visão financeira</h1>
               <p className="page-description">Monitore saldo, receitas, despesas, metas e alertas com uma visão executiva dos seus dados.</p>
             </div>
-            <div className="surface-card px-5 py-4 text-right">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Mês atual</p>
-              <p className="mt-1 text-sm font-medium capitalize text-slate-200">
-                {new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(today)}
-              </p>
+            <div className="flex items-center">
+              <Suspense fallback={<div className="h-10 w-32 animate-pulse rounded-xl bg-white/5" />}>
+                <DashboardFilter />
+              </Suspense>
             </div>
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <FinancialCard title="Saldo total" value={formatCurrency(balance)} description="Saldo disponível atualmente" />
-            <FinancialCard title="Receitas" value={formatCurrency(income)} description="Total recebido" variant="income" />
-            <FinancialCard title="Despesas" value={formatCurrency(expense)} description="Total gasto" variant="expense" />
-            <FinancialCard title="Economia do mês" value={formatCurrency(monthSavings)} description="Receitas menos despesas do mês" variant={monthSavings >= 0 ? "income" : "expense"} />
+            <FinancialCard title="Saldo total" value={formatCurrency(balance)} description="Saldo disponível" />
+            <FinancialCard title="Receitas do período" value={formatCurrency(periodIncome)} description="Total recebido" variant="income" />
+            <FinancialCard title="Despesas do período" value={formatCurrency(periodExpense)} description="Total gasto" variant="expense" />
+            <FinancialCard title="Economia no período" value={formatCurrency(periodSavings)} description="Receitas menos despesas" variant={periodSavings >= 0 ? "income" : "expense"} />
           </div>
 
           <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(360px,0.8fr)]">
@@ -151,7 +191,7 @@ export default async function DashboardPage() {
           </div>
 
           <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(360px,0.8fr)]">
-            <RecentTransactions transactions={transactions.slice(0, 5)} />
+            <RecentTransactions transactions={currentPeriodTransactions.slice(0, 5)} />
 
             <section className="surface-panel">
               <div className="flex items-center gap-3">

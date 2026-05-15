@@ -30,17 +30,35 @@ export function FinancialCard({
   };
   const styles = variantStyle[variant];
 
+  const valueLength = value.length;
+  let textSizeClass = "text-xl md:text-2xl tracking-tight";
+  
+  if (valueLength > 22) {
+    textSizeClass = "text-[11px] sm:text-xs md:text-sm tracking-tighter";
+  } else if (valueLength > 18) {
+    textSizeClass = "text-xs sm:text-sm md:text-base tracking-tighter";
+  } else if (valueLength > 14) {
+    textSizeClass = "text-sm sm:text-base md:text-lg tracking-tight";
+  } else if (valueLength > 10) {
+    textSizeClass = "text-base sm:text-lg md:text-xl tracking-tight";
+  }
+
   return (
-    <div className={`surface-card relative overflow-hidden p-5 shadow-2xl ${styles.glow}`}>
+    <div className={`surface-card relative flex h-full flex-col overflow-hidden p-6 shadow-xl transition-all hover:shadow-2xl ${styles.glow}`}>
       <div className={`absolute left-0 top-0 h-full w-1 ${styles.accent}`} />
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{title}</p>
-          <h2 className={`mt-3 truncate text-2xl font-semibold tracking-tight md:text-3xl ${styles.value}`}>{value}</h2>
-        </div>
-        <span className={`mt-1 size-2.5 rounded-full ${styles.accent}`} />
+      
+      <div className="flex min-h-[36px] items-start gap-2.5">
+        <span className={`mt-1 size-2 shrink-0 rounded-full ${styles.accent} shadow-sm`} />
+        <p className="text-xs font-semibold uppercase leading-snug tracking-widest text-slate-400">{title}</p>
       </div>
-      <p className="mt-4 text-sm leading-5 text-slate-400">{description}</p>
+      
+      <div className="mt-5 flex-1 flex items-center">
+        <h2 className={`whitespace-nowrap font-bold w-full ${textSizeClass} ${styles.value}`} title={value}>
+          {value}
+        </h2>
+      </div>
+
+      <p className="mt-4 text-sm font-medium text-slate-500">{description}</p>
     </div>
   );
 }

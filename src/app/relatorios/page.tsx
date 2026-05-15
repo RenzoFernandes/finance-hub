@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Download } from "lucide-react";
+import { Suspense } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
+import { DashboardFilter } from "@/components/dashboard/dashboard-filter";
 import { FinancialCard } from "@/components/dashboard/financial-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +34,16 @@ export default async function ReportsPage({
 }) {
   const user = await requireUser();
   const params = await searchParams;
-  const filters = buildTransactionFilters(user.id, params);
+  
+  const today = new Date();
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
+  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().slice(0, 10);
+  
+  const startParam = typeof params.start !== 'undefined' ? params.start : firstDay;
+  const endParam = typeof params.end !== 'undefined' ? params.end : lastDay;
+  
+  const activeParams = { ...params, start: startParam, end: endParam };
+  const filters = buildTransactionFilters(user.id, activeParams);
 
   const [transactions, categories] = await Promise.all([
     prisma.transaction.findMany({
@@ -71,24 +82,32 @@ export default async function ReportsPage({
             </Button>
           </div>
 
-          <form className="surface-panel mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-[160px_220px_160px_160px_auto]">
-            <select name="type" defaultValue={params.type ?? ""} className="field-control">
-              <option value="">Todos os tipos</option>
-              <option value="income">Receitas</option>
-              <option value="expense">Despesas</option>
+          <form id="filter-form" className="hidden">
+            <input type="hidden" name="start" value={startParam || ""} />
+            <input type="hidden" name="end" value={endParam || ""} />
+          </form>
+
+          <div className="surface-panel relative z-20 mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-[160px_220px_auto_auto]">
+            <select form="filter-form" name="type" defaultValue={params.type ?? ""} className="field-control h-10">
+              <option className="bg-[#090d14] text-slate-200" value="">Todos os tipos</option>
+              <option className="bg-[#090d14] text-slate-200" value="income">Receitas</option>
+              <option className="bg-[#090d14] text-slate-200" value="expense">Despesas</option>
             </select>
-            <select name="categoryId" defaultValue={params.categoryId ?? ""} className="field-control">
-              <option value="">Todas as categorias</option>
+            <select form="filter-form" name="categoryId" defaultValue={params.categoryId ?? ""} className="field-control h-10">
+              <option className="bg-[#090d14] text-slate-200" value="">Todas as categorias</option>
               {categories.map((category) => (
-                <option key={category.id} value={category.id}>
+                <option className="bg-[#090d14] text-slate-200" key={category.id} value={category.id}>
                   {category.name}
                 </option>
               ))}
             </select>
-            <Input name="start" type="date" defaultValue={params.start} className="field-control" />
-            <Input name="end" type="date" defaultValue={params.end} className="field-control" />
-            <Button className="h-10 rounded-xl bg-white text-slate-950 hover:bg-slate-200">Filtrar</Button>
-          </form>
+            
+            <Suspense fallback={<div className="h-10 animate-pulse rounded-xl bg-white/5" />}>
+              <DashboardFilter />
+            </Suspense>
+
+            <Button form="filter-form" className="h-10 rounded-xl bg-white text-slate-950 hover:bg-slate-200">Filtrar</Button>
+          </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <FinancialCard title="Total recebido" value={formatCurrency(summary.totalIncome)} description="Receitas no período" variant="income" />

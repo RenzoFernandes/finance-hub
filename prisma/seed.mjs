@@ -28,16 +28,47 @@ const demoGoals = [
   { title: "Novo notebook", targetAmount: 6500, currentAmount: 6500, deadlineOffsetDays: 15 },
 ];
 
-const demoTransactions = [
-  { title: "Salário mensal", amount: 8500, type: "income", category: "Salário", daysAgo: 2 },
-  { title: "Projeto landing page", amount: 2200, type: "income", category: "Freelance", daysAgo: 7 },
-  { title: "Dividendos", amount: 420, type: "income", category: "Investimentos", daysAgo: 11 },
-  { title: "Aluguel", amount: 2600, type: "expense", category: "Moradia", daysAgo: 3 },
-  { title: "Mercado semanal", amount: 680, type: "expense", category: "Alimentação", daysAgo: 5 },
-  { title: "Uber e metrô", amount: 240, type: "expense", category: "Transporte", daysAgo: 9 },
-  { title: "Consulta médica", amount: 350, type: "expense", category: "Saúde", daysAgo: 12 },
-  { title: "Restaurante", amount: 310, type: "expense", category: "Lazer", daysAgo: 18 },
-];
+const demoTransactions = [];
+const startDate = new Date('2024-01-01T12:00:00Z');
+const endDate = new Date();
+let currentDate = new Date(startDate);
+
+while (currentDate <= endDate) {
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  
+  demoTransactions.push({ title: "Salário mensal", amount: 8500, type: "income", category: "Salário", date: new Date(Date.UTC(year, month, 5, 12)) });
+  demoTransactions.push({ title: "Aluguel", amount: 2600, type: "expense", category: "Moradia", date: new Date(Date.UTC(year, month, 10, 12)) });
+  demoTransactions.push({ title: "Internet e Luz", amount: 280, type: "expense", category: "Moradia", date: new Date(Date.UTC(year, month, 15, 12)) });
+  
+  for (let week = 1; week <= 4; week++) {
+    const amount = 400 + Math.floor(Math.random() * 300);
+    demoTransactions.push({ title: "Mercado", amount, type: "expense", category: "Alimentação", date: new Date(Date.UTC(year, month, week * 7, 12)) });
+  }
+
+  for (let i = 0; i < 4; i++) {
+    const amount = 100 + Math.floor(Math.random() * 150);
+    const day = 5 + Math.floor(Math.random() * 20);
+    demoTransactions.push({ title: "Restaurante/Delivery", amount, type: "expense", category: "Lazer", date: new Date(Date.UTC(year, month, day, 12)) });
+  }
+
+  for (let i = 0; i < 6; i++) {
+    const amount = 20 + Math.floor(Math.random() * 40);
+    const day = 1 + Math.floor(Math.random() * 28);
+    demoTransactions.push({ title: "Uber e Metrô", amount, type: "expense", category: "Transporte", date: new Date(Date.UTC(year, month, day, 12)) });
+  }
+
+  if (month % 2 === 0) {
+    const amount = 1500 + Math.floor(Math.random() * 1000);
+    demoTransactions.push({ title: "Projeto Freelance", amount, type: "income", category: "Freelance", date: new Date(Date.UTC(year, month, 20, 12)) });
+  }
+  
+  demoTransactions.push({ title: "Dividendos FIIs", amount: 350 + Math.floor(Math.random() * 100), type: "income", category: "Investimentos", date: new Date(Date.UTC(year, month, 15, 12)) });
+
+  currentDate.setMonth(currentDate.getMonth() + 1);
+}
+
+const filteredDemoTransactions = demoTransactions.filter(t => t.date <= endDate);
 
 async function hashPassword(password) {
   const salt = randomBytes(16).toString("hex");
@@ -112,7 +143,7 @@ async function main() {
   });
 
   await prisma.transaction.createMany({
-    data: demoTransactions.map((transaction) => {
+    data: filteredDemoTransactions.map((transaction) => {
       const category = categories.get(transaction.category);
 
       return {
@@ -120,7 +151,7 @@ async function main() {
         amount: transaction.amount,
         type: transaction.type,
         description: "Dado inicial da conta demo",
-        date: daysAgo(transaction.daysAgo),
+        date: transaction.date,
         userId: user.id,
         categoryId: category.id,
       };

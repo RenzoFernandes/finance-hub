@@ -40,8 +40,8 @@ export default async function CategoriesPage() {
           <form action={createCategoryAction} className="surface-panel mt-8 grid gap-4 md:grid-cols-[1fr_180px_120px_auto]">
             <Input name="name" placeholder="Nome da categoria" className="field-control h-11" required />
             <select name="type" className="field-control h-11">
-              <option value="expense">Despesa</option>
-              <option value="income">Receita</option>
+              <option className="bg-[#090d14] text-slate-200" value="expense">Despesa</option>
+              <option className="bg-[#090d14] text-slate-200" value="income">Receita</option>
             </select>
             <Input name="color" type="color" defaultValue="#22c55e" className="field-control h-11 p-1" aria-label="Cor da categoria" />
             <Button className="h-11 rounded-xl bg-emerald-300 font-semibold text-slate-950 hover:bg-emerald-200">
@@ -60,8 +60,8 @@ export default async function CategoriesPage() {
                     <input type="hidden" name="id" value={category.id} />
                     <Input name="name" defaultValue={category.name} className="field-control h-10" />
                     <select name="type" defaultValue={category.type} className="field-control h-10">
-                      <option value="expense">Despesa</option>
-                      <option value="income">Receita</option>
+                      <option className="bg-[#090d14] text-slate-200" value="expense">Despesa</option>
+                      <option className="bg-[#090d14] text-slate-200" value="income">Receita</option>
                     </select>
                     <Input name="color" type="color" defaultValue={category.color} className="field-control h-10 p-1" />
 

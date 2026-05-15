@@ -11,8 +11,8 @@ type AuthCardProps = {
 
 export function AuthCard({ title, description, footer, children }: AuthCardProps) {
   return (
-    <main className="grid min-h-screen bg-[#080b10] px-4 py-10 text-white lg:grid-cols-[1fr_520px]">
-      <section className="hidden min-h-[calc(100vh-5rem)] items-center justify-center border border-white/10 bg-slate-950/60 p-10 shadow-2xl shadow-black/30 backdrop-blur lg:flex">
+    <main className="grid min-h-screen sm:h-screen sm:overflow-hidden bg-[#080b10] p-4 lg:p-6 text-white lg:grid-cols-[1fr_500px] xl:grid-cols-[1fr_560px] lg:gap-6 xl:gap-8">
+      <section className="hidden h-full items-center justify-center rounded-3xl border border-white/10 bg-slate-950/60 p-10 shadow-2xl shadow-black/30 backdrop-blur lg:flex">
         <div className="max-w-xl">
           <div className="flex items-center gap-3">
             <span className="grid size-12 place-items-center rounded-2xl border border-emerald-300/25 bg-emerald-400/10 text-emerald-300">
