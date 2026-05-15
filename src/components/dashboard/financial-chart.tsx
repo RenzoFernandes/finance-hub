@@ -10,15 +10,17 @@ import {
   YAxis,
 } from "recharts";
 
-const data = [
-  { month: "Jan", receitas: 5200, despesas: 3100 },
-  { month: "Fev", receitas: 6100, despesas: 2800 },
-  { month: "Mar", receitas: 5800, despesas: 3400 },
-  { month: "Abr", receitas: 7200, despesas: 3900 },
-  { month: "Mai", receitas: 8200, despesas: 3400 },
-];
+type ChartData = {
+  month: string;
+  receitas: number;
+  despesas: number;
+};
 
-export function FinancialChart() {
+type FinancialChartProps = {
+  data: ChartData[];
+};
+
+export function FinancialChart({ data }: FinancialChartProps) {
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mt-8">
       <div>
@@ -27,7 +29,7 @@ export function FinancialChart() {
         </h2>
 
         <p className="text-zinc-400 text-sm mt-1">
-          Comparativo financeiro dos últimos meses
+          Comparativo financeiro com dados reais
         </p>
       </div>
 

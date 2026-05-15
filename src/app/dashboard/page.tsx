@@ -25,6 +25,14 @@ export default async function DashboardPage() {
 
   const balance = income - expense;
 
+  const chartData = [
+    {
+      month: "Atual",
+      receitas: income,
+      despesas: expense,
+    },
+  ];
+
   return (
     <main className="flex min-h-screen bg-zinc-950">
       <Sidebar />
@@ -35,9 +43,7 @@ export default async function DashboardPage() {
         <div className="p-8">
           <h1 className="text-3xl font-bold text-white">Visão Financeira</h1>
 
-          <p className="mt-2 text-zinc-400">
-            Monitore suas finanças e metas.
-          </p>
+          <p className="mt-2 text-zinc-400">Monitore suas finanças e metas.</p>
 
           <div className="mt-10 grid grid-cols-3 gap-6">
             <FinancialCard
@@ -61,7 +67,7 @@ export default async function DashboardPage() {
             />
           </div>
 
-          <FinancialChart />
+          <FinancialChart data={chartData} />
 
           <RecentTransactions />
         </div>
