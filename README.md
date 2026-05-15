@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FinanceHub
 
-## Getting Started
+FinanceHub é um sistema SaaS de gerenciamento de finanças pessoais criado com Next.js App Router, Prisma e PostgreSQL. A aplicação permite acompanhar saldo, receitas, despesas, categorias, metas financeiras, relatórios e exportações em uma interface moderna, responsiva e em português do Brasil.
 
-First, run the development server:
+## Tecnologias
+
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- Prisma ORM
+- PostgreSQL
+- Docker Compose
+- Recharts
+- Sonner
+- Lucide React
+- shadcn/ui
+
+## Funcionalidades
+
+- Autenticação com login, cadastro, sessão via cookie HTTP-only e conta demo
+- Dados financeiros separados por usuário
+- Dashboard com saldo total, receitas, despesas, economia do mês, alertas, metas e gráficos
+- Transações com criação, listagem, edição, exclusão, filtros, busca e exportação CSV
+- Categorias com criação, edição, exclusão protegida e cores
+- Metas financeiras com valor alvo, valor atual, prazo, progresso e status
+- Relatórios com filtros, resumo financeiro, maior categoria de despesa, média de gastos, tabela detalhada e exportação PDF
+- Layout dark mode, responsivo e com navegação mobile
+
+## Conta Demo
+
+Após rodar o seed:
+
+```txt
+E-mail: demo@financehub.com
+Senha: demo123456
+```
+
+## Como Rodar Localmente
+
+Instale as dependências:
+
+```bash
+npm install
+```
+
+Configure o arquivo `.env`:
+
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/financehub?schema=public"
+```
+
+Suba o banco com Docker:
+
+```bash
+docker compose up -d
+```
+
+Aplique as migrations e rode o seed:
+
+```bash
+npx prisma migrate dev
+npm run db:seed
+```
+
+Inicie o servidor:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```txt
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Docker
 
-## Learn More
+O projeto usa Docker Compose para o PostgreSQL local:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+docker compose up -d
+docker compose down
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Verifique o `docker-compose.yml` para porta, usuário, senha e nome do banco.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Prisma
 
-## Deploy on Vercel
+Comandos úteis:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npx prisma generate
+npx prisma migrate dev
+npx prisma migrate status
+npm run db:seed
+npx prisma studio
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Qualidade
+
+Valide o projeto antes de publicar:
+
+```bash
+npm run lint
+npm run build
+```
+
+## Screenshots
+
+Adicione imagens do projeto em `public/screenshots` e substitua os placeholders abaixo:
+
+- `public/screenshots/dashboard.png`
+- `public/screenshots/transacoes.png`
+- `public/screenshots/relatorios.png`
+
+## Melhorias Futuras
+
+- Recuperação de senha
+- Convites e múltiplas contas por workspace
+- Orçamentos mensais por categoria
+- Importação OFX/CSV
+- Recorrência de transações
+- Testes automatizados end-to-end
+- Deploy com pipeline CI/CD
