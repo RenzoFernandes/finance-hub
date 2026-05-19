@@ -36,51 +36,25 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
       {transactions.length === 0 ? (
         <div className="mt-6 empty-state">Nenhuma transação cadastrada ainda.</div>
       ) : (
-        <div className="scroll-shell mt-6">
-          <table className="w-full min-w-[680px] text-sm">
-            <thead>
-              <tr className="border-b border-white/10 text-xs uppercase tracking-[0.14em] text-slate-500">
-                <th className="px-3 py-3 text-left">Descrição</th>
-                <th className="px-3 py-3 text-left">Categoria</th>
-                <th className="px-3 py-3 text-left">Data</th>
-                <th className="px-3 py-3 text-right">Valor</th>
-                <th className="px-3 py-3 text-right">Tipo</th>
-              </tr>
-            </thead>
+        <div className="mt-6 divide-y divide-white/[0.08]">
+          {transactions.map((transaction) => (
+            <div key={transaction.id} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-white">{transaction.title}</p>
+                <p className="mt-1 flex min-w-0 items-center gap-2 text-xs text-slate-400">
+                  <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: transaction.category.color }} />
+                  <span className="truncate">{transaction.category.name}</span>
+                </p>
+              </div>
 
-            <tbody>
-              {transactions.map((transaction) => (
-                <tr key={transaction.id} className="border-b border-white/[0.08] last:border-0">
-                  <td className="px-3 py-4 font-medium text-white">{transaction.title}</td>
-                  <td className="px-3 py-4 text-slate-300">
-                    <span className="inline-flex items-center gap-2">
-                      <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: transaction.category.color }} />
-                      {transaction.category.name}
-                    </span>
-                  </td>
-                  <td className="px-3 py-4 text-slate-400">{formatDate(transaction.date)}</td>
-                  <td
-                    className={`px-3 py-4 text-right font-semibold ${
-                      transaction.type === "income" ? "text-emerald-300" : "text-rose-300"
-                    }`}
-                  >
-                    {transaction.type === "income" ? "+" : "-"} {formatCurrency(transaction.amount)}
-                  </td>
-                  <td className="px-3 py-4 text-right">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        transaction.type === "income"
-                          ? "bg-emerald-300/10 text-emerald-300"
-                          : "bg-rose-300/10 text-rose-300"
-                      }`}
-                    >
-                      {transaction.type === "income" ? "Receita" : "Despesa"}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              <div className="shrink-0 text-right">
+                <p className={`text-sm font-semibold ${transaction.type === "income" ? "text-emerald-300" : "text-rose-300"}`}>
+                  {transaction.type === "income" ? "+" : "-"} {formatCurrency(transaction.amount)}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">{formatDate(transaction.date)}</p>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </section>

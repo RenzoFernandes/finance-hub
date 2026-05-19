@@ -1,9 +1,10 @@
 import { Filter, Trash2 } from "lucide-react";
 import type { Prisma, TransactionType } from "@prisma/client";
 import { Suspense } from "react";
-import { deleteTransactionAction, updateTransactionAction } from "@/app/transactions/actions";
+import { deleteTransactionAction } from "@/app/transactions/actions";
 import { DashboardFilter } from "@/components/dashboard/dashboard-filter";
 import { ExportButton } from "@/components/export-button";
+import { TransactionEditDialog } from "@/components/transaction-edit-dialog";
 import { TransactionForm } from "@/components/transaction-form";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
@@ -41,7 +42,7 @@ export default async function TransactionsPage({
   const user = await requireUser();
   const params = await searchParams;
   const today = new Date();
-  
+
   const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
 
@@ -95,7 +96,7 @@ export default async function TransactionsPage({
             <div>
               <p className="page-kicker">Operações</p>
               <h1 className="page-title">Transações</h1>
-              <p className="page-description">Gerencie, filtre, edite e exporte suas movimentações com uma tabela operacional clara.</p>
+              <p className="page-description">Gerencie, filtre, edite e exporte suas movimentações com uma visão operacional clara.</p>
             </div>
 
             <div className="responsive-actions">
@@ -107,22 +108,22 @@ export default async function TransactionsPage({
           <div className="surface-panel relative z-20 mt-8">
             <div className="mb-5 flex items-center gap-2 border-b border-white/[0.06] pb-4">
               <Filter className="size-4 text-emerald-300" />
-              <span className="font-medium text-white tracking-tight">Filtros de busca</span>
+              <span className="font-medium tracking-tight text-white">Filtros de busca</span>
             </div>
-            
+
             <form id="filter-form" className="hidden">
               <input type="hidden" name="start" value={params.start ?? ""} />
               <input type="hidden" name="end" value={params.end ?? ""} />
             </form>
-            
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_160px_220px_minmax(180px,auto)_auto]">
-              <Input form="filter-form" name="q" defaultValue={params.q} placeholder="Buscar por título ou descrição" className="field-control h-10" />
-              <select form="filter-form" name="type" defaultValue={params.type ?? ""} className="field-control h-10">
+
+            <div className="grid min-w-0 items-center gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,0.75fr)_minmax(0,1fr)_minmax(0,0.9fr)_110px]">
+              <Input form="filter-form" name="q" defaultValue={params.q} placeholder="Buscar por título ou descrição" className="field-control h-10 min-w-0" />
+              <select form="filter-form" name="type" defaultValue={params.type ?? ""} className="field-control h-10 min-w-0">
                 <option className="bg-[#090d14] text-slate-200" value="">Todos os tipos</option>
                 <option className="bg-[#090d14] text-slate-200" value="income">Receitas</option>
                 <option className="bg-[#090d14] text-slate-200" value="expense">Despesas</option>
               </select>
-              <select form="filter-form" name="categoryId" defaultValue={params.categoryId ?? ""} className="field-control h-10">
+              <select form="filter-form" name="categoryId" defaultValue={params.categoryId ?? ""} className="field-control h-10 min-w-0">
                 <option className="bg-[#090d14] text-slate-200" value="">Todas as categorias</option>
                 {categories.map((category) => (
                   <option className="bg-[#090d14] text-slate-200" key={category.id} value={category.id}>
@@ -130,95 +131,78 @@ export default async function TransactionsPage({
                   </option>
                 ))}
               </select>
-              
-              <Suspense fallback={<div className="h-10 animate-pulse rounded-xl bg-white/5" />}>
-                <DashboardFilter />
-              </Suspense>
 
-              <Button form="filter-form" type="submit" className="h-10 rounded-xl bg-white font-medium text-slate-950 shadow-md hover:bg-slate-200">Aplicar</Button>
+              <div className="min-w-0 [&>div]:w-full [&_button]:w-full">
+                <Suspense fallback={<div className="h-10 animate-pulse rounded-xl bg-white/5" />}>
+                  <DashboardFilter />
+                </Suspense>
+              </div>
+
+              <Button form="filter-form" type="submit" className="h-10 w-full min-w-0 rounded-xl bg-white font-medium text-slate-950 shadow-md hover:bg-slate-200">
+                Aplicar
+              </Button>
             </div>
           </div>
 
-          <div className="table-shell mt-8">
+          <div className="mt-8">
             {transactions.length === 0 ? (
-              <div className="empty-state m-6">Nenhuma transação encontrada para os filtros selecionados.</div>
+              <div className="empty-state">Nenhuma transação encontrada para os filtros selecionados.</div>
             ) : (
-              <div className="scroll-shell">
-                <table className="w-full min-w-[980px] text-sm">
-                  <thead className="table-head">
-                    <tr>
-                      <th className="p-3 text-left font-semibold text-slate-400">Título e Descrição</th>
-                      <th className="p-3 text-left font-semibold text-slate-400">Categoria</th>
-                      <th className="p-3 text-left font-semibold text-slate-400">Data</th>
-                      <th className="p-3 text-left font-semibold text-slate-400">Tipo</th>
-                      <th className="p-3 text-right font-semibold text-slate-400">Valor (R$)</th>
-                      <th className="p-3 text-right font-semibold text-slate-400">Ações</th>
-                    </tr>
-                  </thead>
+              <div className="space-y-4">
+                {transactions.map((transaction) => (
+                  <div key={transaction.id} className="surface-panel p-4 sm:p-5">
+                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+                      <div className="min-w-0">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0">
+                            <p className="truncate text-base font-semibold text-white">{transaction.title}</p>
+                            {transaction.description ? (
+                              <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-400">{transaction.description}</p>
+                            ) : null}
+                          </div>
 
-                  <tbody>
-                    {transactions.map((transaction) => (
-                      <tr key={transaction.id} className="table-row align-top">
-                        <td className="p-3">
-                          <form id={`transaction-${transaction.id}`} action={updateTransactionAction} className="space-y-2">
-                            <input type="hidden" name="id" value={transaction.id} />
-                            <Input name="title" defaultValue={transaction.title} className="field-control h-9 w-full min-w-[140px]" />
-                            <Input name="description" defaultValue={transaction.description ?? ""} placeholder="Descrição opcional" className="field-control h-9 w-full min-w-[140px]" />
-                          </form>
-                        </td>
-                        <td className="p-3">
-                          <select form={`transaction-${transaction.id}`} name="categoryId" defaultValue={transaction.categoryId} className="field-control h-9 w-full min-w-[130px]">
-                            {categories
-                              .filter((category) => category.type === transaction.type)
-                              .map((category) => (
-                                <option className="bg-[#090d14] text-slate-200" key={category.id} value={category.id}>
-                                  {category.name}
-                                </option>
-                              ))}
-                          </select>
-                        </td>
-                        <td className="p-3">
-                          <Input form={`transaction-${transaction.id}`} name="date" type="date" defaultValue={formatDateInput(transaction.date)} className="field-control h-9 w-full min-w-[125px]" />
-                          <p className="mt-2 text-xs font-medium text-slate-500">{formatDate(transaction.date)}</p>
-                        </td>
-                        <td className="p-3">
-                          <select form={`transaction-${transaction.id}`} name="type" defaultValue={transaction.type} className="field-control h-9 w-full min-w-[110px]">
-                            <option className="bg-[#090d14] text-slate-200" value="income">Receita</option>
-                            <option className="bg-[#090d14] text-slate-200" value="expense">Despesa</option>
-                          </select>
-                        </td>
-                        <td className="p-3 text-right">
-                          <Input
-                            form={`transaction-${transaction.id}`}
-                            name="amount"
-                            type="number"
-                            min="0.01"
-                            step="0.01"
-                            defaultValue={transaction.amount}
-                            className="field-control ml-auto h-9 w-28 text-right"
-                          />
-                          <p className={`mt-2 font-semibold ${transaction.type === "income" ? "text-emerald-300" : "text-rose-300"}`}>
+                          <p className={`shrink-0 text-sm font-semibold ${transaction.type === "income" ? "text-emerald-300" : "text-rose-300"}`}>
                             {transaction.type === "income" ? "+" : "-"} {formatCurrency(transaction.amount)}
                           </p>
-                        </td>
-                        <td className="p-3 text-right align-top">
-                          <div className="flex flex-col items-end gap-2">
-                            <Button form={`transaction-${transaction.id}`} type="submit" variant="outline" size="sm" className="h-9 w-24 rounded-lg border-emerald-400/20 bg-emerald-400/10 text-xs font-semibold text-emerald-300 hover:bg-emerald-400/20">
-                              Salvar
-                            </Button>
-                            <form action={deleteTransactionAction}>
-                              <input type="hidden" name="id" value={transaction.id} />
-                              <Button type="submit" variant="destructive" size="sm" className="h-9 w-24 rounded-lg bg-rose-500/10 text-xs font-semibold text-rose-300 hover:bg-rose-500/20">
-                                <Trash2 className="mr-1.5 size-3" />
-                                Excluir
-                              </Button>
-                            </form>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+
+                        <div className="mt-4 grid gap-2 text-xs text-slate-400 sm:grid-cols-3">
+                          <span className="flex min-w-0 items-center gap-2">
+                            <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: transaction.category.color }} />
+                            <span className="truncate">{transaction.category.name}</span>
+                          </span>
+                          <span>{formatDate(transaction.date)}</span>
+                          <span className={transaction.type === "income" ? "text-emerald-300" : "text-rose-300"}>
+                            {transaction.type === "income" ? "Receita" : "Despesa"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2 sm:flex-row lg:justify-end">
+                        <TransactionEditDialog
+                          categories={categories}
+                          transaction={{
+                            id: transaction.id,
+                            title: transaction.title,
+                            description: transaction.description ?? "",
+                            amount: transaction.amount,
+                            type: transaction.type,
+                            categoryId: transaction.categoryId,
+                            date: formatDateInput(transaction.date),
+                          }}
+                        />
+
+                        <form action={deleteTransactionAction}>
+                          <input type="hidden" name="id" value={transaction.id} />
+                          <Button type="submit" variant="destructive" size="sm" className="h-10 w-full rounded-lg bg-rose-500/10 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 sm:w-28">
+                            <Trash2 className="mr-1.5 size-3" />
+                            Excluir
+                          </Button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
